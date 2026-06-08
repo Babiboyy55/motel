@@ -1,0 +1,17 @@
+## Ignore Visual Studio temporary files, build results, and user settings
+[Oo]bj/
+[Bb]in/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Rider and other IDEs
+.idea/
+.csproj.user
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
