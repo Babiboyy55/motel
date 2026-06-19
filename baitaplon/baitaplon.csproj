@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -14,6 +15,8 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,8 +38,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.2\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniExcel, Version=1.44.1.0, Culture=neutral, PublicKeyToken=e7310002a53eac39, processorArchitecture=MSIL">
+      <HintPath>..\packages\MiniExcel.1.44.1\lib\net45\MiniExcel.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,13 +69,45 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.cs" />
+    <Compile Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.Designer.cs">
+      <DependentUpon>202606121311287_TaoBangAdminVaDoanhThu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.cs" />
+    <Compile Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.Designer.cs">
+      <DependentUpon>202606130213009_CapNhatKhoaChinhPhongVaKhach.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202606191336122_ThemCotTenNguoiDung.cs" />
+    <Compile Include="Migrations\202606191336122_ThemCotTenNguoiDung.Designer.cs">
+      <DependentUpon>202606191336122_ThemCotTenNguoiDung.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\HoaDon.cs" />
+    <Compile Include="Models\NguoiDung.cs" />
+    <Compile Include="Models\NhatKyHoatDong.cs" />
+    <Compile Include="Models\NhaTroDbContext.cs" />
     <Compile Include="ViewModels\Admin\AdminMainViewModel.cs" />
+    <Compile Include="ViewModels\Admin\DashboardViewModel.cs" />
+    <Compile Include="ViewModels\Admin\QuanLyHopDongViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyKhachViewModel.cs" />
+    <Compile Include="ViewModels\Admin\QuanLyNguoiDungViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyPhongViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\User\TimKiemPhongViewModel.cs" />
     <Compile Include="ViewModels\User\UserMainViewModel.cs" />
+    <Compile Include="Views\Admin\TaoHopDongWindow.xaml.cs">
+      <DependentUpon>TaoHopDongWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\DashboardView.xaml.cs">
+      <DependentUpon>DashboardView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyHopDongView.xaml.cs">
+      <DependentUpon>QuanLyHopDongView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyNguoiDungView.xaml.cs">
+      <DependentUpon>QuanLyNguoiDungView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Admin\UserControls\QuanLyPhong.xaml.cs">
       <DependentUpon>QuanLyPhong.xaml</DependentUpon>
     </Compile>
@@ -80,6 +126,22 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\Admin\TaoHopDongWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\DashboardView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyHopDongView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyNguoiDungView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Admin\UserControls\QuanLyPhong.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -88,27 +150,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\LoginWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\User\UserControls\TimKiemPhong.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\User\UserControls\XemChiTietPhong.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\User\UserMainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\HopDong.cs" />
     <Compile Include="Models\KhachThue.cs" />
-    <Compile Include="Models\NhaTroModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NhaTroModel.edmx</DependentUpon>
-    </Compile>
     <Compile Include="Models\PhongTro.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -123,14 +168,20 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.resx">
+      <DependentUpon>202606121311287_TaoBangAdminVaDoanhThu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.resx">
+      <DependentUpon>202606130213009_CapNhatKhoaChinhPhongVaKhach.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202606191336122_ThemCotTenNguoiDung.resx">
+      <DependentUpon>202606191336122_ThemCotTenNguoiDung.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EntityDeploy Include="Models\NhaTroModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>NhaTroModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -141,6 +192,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Views\User\UserControls\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.2\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.2\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quanlynhatro.Models
 {
@@ -7,6 +8,7 @@ namespace Quanlynhatro.Models
     /// </summary>
     public class KhachThue
     {
+        [Key]
         public int KhachID { get; set; }
         public string HoTen { get; set; }
         public string SoDienThoai { get; set; }

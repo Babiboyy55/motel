@@ -1,44 +1,33 @@
 ﻿using baitaplon.ViewModels;
-using baitaplon.ViewModels.Admin;
-using Quanlynhatro.Models;
-using System.Collections.ObjectModel;
+using Quanlynhatro.ViewModels;
 using System.Windows.Input;
 
-namespace Quanlynhatro.ViewModels.Admin
+namespace baitaplon.ViewModels.Admin
 {
-    /// <summary>
-    /// AdminMainViewModel - Điều khiển menu chính của Admin
-    /// </summary>
     public class AdminMainViewModel : BaseViewModel
     {
-        private BaseViewModel _currentViewModel;
-
-        public BaseViewModel CurrentViewModel
+        // Thuộc tính lưu trữ View hiện tại đang được hiển thị
+        private BaseViewModel _currentView;
+        public BaseViewModel CurrentView
         {
-            get => _currentViewModel;
-            set => SetProperty(ref _currentViewModel, value);
+            get => _currentView;
+            set { _currentView = value; OnPropertyChanged(); }
         }
 
-        public ICommand ShowQuanLyPhongCommand { get; }
-        public ICommand ShowQuanLyKhachCommand { get; }
+        // Các lệnh (Command) cho nút bấm Sidebar
+        public ICommand HienThiDashboardCommand { get; set; }
+        public ICommand HienThiHopDongCommand { get; set; }
+        public ICommand HienThiNguoiDungCommand { get; set; }
 
         public AdminMainViewModel()
         {
-            ShowQuanLyPhongCommand = new RelayCommand(o => ShowQuanLyPhong());
-            ShowQuanLyKhachCommand = new RelayCommand(o => ShowQuanLyKhach());
+            // Mặc định khi vừa mở app lên sẽ hiển thị Dashboard
+            CurrentView = new DashboardViewModel();
 
-            // Mặc định hiển thị màn hình quản lý phòng
-            ShowQuanLyPhong();
-        }
-
-        private void ShowQuanLyPhong()
-        {
-            CurrentViewModel = new QuanLyPhongViewModel();
-        }
-
-        private void ShowQuanLyKhach()
-        {
-            CurrentViewModel = new QuanLyKhachViewModel();
+            // Khởi tạo các sự kiện đổi trang (Đã gỡ bỏ tham số p=>true để tránh lỗi RelayCommand)
+            HienThiDashboardCommand = new RelayCommand(p => CurrentView = new DashboardViewModel());
+            HienThiHopDongCommand = new RelayCommand(p => CurrentView = new QuanLyHopDongViewModel());
+            HienThiNguoiDungCommand = new RelayCommand(p => CurrentView = new QuanLyNguoiDungViewModel());
         }
     }
 }
