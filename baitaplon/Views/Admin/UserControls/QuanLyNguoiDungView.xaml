@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="baitaplon.Views.Admin.UserControls.QuanLyNguoiDungView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F5F6FA"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+    <Grid Margin="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*"/>
+            <ColumnDefinition Width="4*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="20" Margin="0,0,10,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="QUẢN LÝ TÀI KHOẢN" FontSize="22" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,15"/>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+                    <Button Content="+ Cấp Tài Khoản Mới" Background="#27AE60" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Margin="0,0,10,0"/>
+                    <Button Content="Khóa Tài Khoản" Background="#E74C3C" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                </StackPanel>
+
+                <DataGrid Grid.Row="2" ItemsSource="{Binding DanhSachNguoiDung}" AutoGenerateColumns="False" IsReadOnly="True" Background="White" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                        <DataGridTextColumn Header="Tên Đăng Nhập" Binding="{Binding TenDangNhap}" Width="*"/>
+                        <DataGridTextColumn Header="Họ Tên" Binding="{Binding TenNguoiDung}" Width="*"/>
+                        <DataGridTextColumn Header="Phân Quyền" Binding="{Binding VaiTro}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Background="White" CornerRadius="10" Padding="20" Margin="10,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="⏱️ NHẬT KÝ HOẠT ĐỘNG" FontSize="18" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,15"/>
+
+                <ListView Grid.Row="1" ItemsSource="{Binding DanhSachNhatKy}" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,15">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="{Binding NguoiThucHien}" FontWeight="Bold" Foreground="#2980B9" Margin="0,0,10,0"/>
+                                    <TextBlock Text="{Binding ThoiGian, StringFormat=dd/MM/yyyy HH:mm}" Foreground="#7F8C8D" FontSize="11"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding HanhDong}" TextWrapping="Wrap" Foreground="#34495E"/>
+                                <Rectangle Height="1" Fill="#ECF0F1" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

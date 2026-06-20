@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 using Quanlynhatro.ViewModels;
 using Quanlynhatro.Services;
+=======
+﻿using baitaplon.ViewModels;
+using Quanlynhatro.ViewModels;
+>>>>>>> 27f0392155f94e0205868ea7fb00a61493c57513
 using System.Windows.Input;
 
-namespace Quanlynhatro.ViewModels.Admin
+namespace baitaplon.ViewModels.Admin
 {
+<<<<<<< HEAD
     /// <summary>
     /// AdminMainViewModel - Điều khiển navigation chính của Admin
     /// </summary>
@@ -13,11 +19,19 @@ namespace Quanlynhatro.ViewModels.Admin
         private int _selectedMenuIndex;
 
         public BaseViewModel CurrentViewModel
+=======
+    public class AdminMainViewModel : BaseViewModel
+    {
+        // Thuộc tính lưu trữ View hiện tại đang được hiển thị
+        private BaseViewModel _currentView;
+        public BaseViewModel CurrentView
+>>>>>>> 27f0392155f94e0205868ea7fb00a61493c57513
         {
-            get => _currentViewModel;
-            set => SetProperty(ref _currentViewModel, value);
+            get => _currentView;
+            set { _currentView = value; OnPropertyChanged(); }
         }
 
+<<<<<<< HEAD
         public int SelectedMenuIndex
         {
             get => _selectedMenuIndex;
@@ -52,6 +66,22 @@ namespace Quanlynhatro.ViewModels.Admin
         private void ShowQuanLyKhach()
         {
             CurrentViewModel = new QuanLyKhachViewModel();
+=======
+        // Các lệnh (Command) cho nút bấm Sidebar
+        public ICommand HienThiDashboardCommand { get; set; }
+        public ICommand HienThiHopDongCommand { get; set; }
+        public ICommand HienThiNguoiDungCommand { get; set; }
+
+        public AdminMainViewModel()
+        {
+            // Mặc định khi vừa mở app lên sẽ hiển thị Dashboard
+            CurrentView = new DashboardViewModel();
+
+            // Khởi tạo các sự kiện đổi trang (Đã gỡ bỏ tham số p=>true để tránh lỗi RelayCommand)
+            HienThiDashboardCommand = new RelayCommand(p => CurrentView = new DashboardViewModel());
+            HienThiHopDongCommand = new RelayCommand(p => CurrentView = new QuanLyHopDongViewModel());
+            HienThiNguoiDungCommand = new RelayCommand(p => CurrentView = new QuanLyNguoiDungViewModel());
+>>>>>>> 27f0392155f94e0205868ea7fb00a61493c57513
         }
 
         private void ShowQuanLyHoaDon()

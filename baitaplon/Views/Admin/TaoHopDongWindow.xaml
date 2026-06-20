@@ -1,0 +1,38 @@
+﻿<Window x:Class="baitaplon.Views.Admin.TaoHopDongWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tạo Hợp Đồng Mới" Height="450" Width="400" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+
+    <Border Padding="20" Background="White">
+        <StackPanel>
+            <TextBlock Text="TẠO HỢP ĐỒNG THUÊ PHÒNG" FontSize="18" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Chọn phòng:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <ComboBox x:Name="cmbPhong" DisplayMemberPath="MaPhong" SelectedValuePath="Id" Height="30" Margin="0,0,0,15"/>
+
+            <TextBlock Text="Chọn khách thuê đại diện:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <ComboBox x:Name="cmbKhach" DisplayMemberPath="HoTen" SelectedValuePath="Id" Height="30" Margin="0,0,0,15"/>
+
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Ngày bắt đầu:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <DatePicker x:Name="dpNgayBatDau" Height="30"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Ngày kết thúc:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <DatePicker x:Name="dpNgayKetThuc" Height="30"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Giá cố định (VNĐ):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtGiaCoDinh" Height="30" Padding="5" Margin="0,0,0,20"/>
+
+            <Button Content="Lưu Hợp Đồng" Click="BtnLuu_Click" Background="#27AE60" Foreground="White" FontWeight="Bold" Height="40" Cursor="Hand" BorderThickness="0"/>
+        </StackPanel>
+    </Border>
+</Window>

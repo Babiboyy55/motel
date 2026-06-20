@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quanlynhatro.Models
 {
@@ -30,6 +32,7 @@ namespace Quanlynhatro.Models
     /// </summary>
     public class PhongTro
     {
+        [Key]
         public int PhongID { get; set; }
         public string TenPhong { get; set; }          // Số/tên phòng (P101, P202...)
         public LoaiPhong LoaiPhong { get; set; }       // Loại phòng

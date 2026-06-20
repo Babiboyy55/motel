@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quanlynhatro.Models
 {
@@ -8,6 +9,7 @@ namespace Quanlynhatro.Models
     /// </summary>
     public class KhachThue
     {
+        [Key]
         public int KhachID { get; set; }
         public string HoTen { get; set; }               // Họ và tên đầy đủ
         public string CCCD { get; set; }                // Số CMND/CCCD
