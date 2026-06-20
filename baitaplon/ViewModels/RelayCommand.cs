@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 
 namespace Quanlynhatro.ViewModels
 {
     /// <summary>
-    /// RelayCommand - Implementation của ICommand cho MVVM
+    /// RelayCommand - Implementation c?a ICommand cho MVVM
     /// </summary>
     public class RelayCommand : ICommand
     {

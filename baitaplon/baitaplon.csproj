@@ -9,6 +9,7 @@
     <RootNamespace>baitaplon</RootNamespace>
     <AssemblyName>baitaplon</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -56,14 +57,29 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModels\Admin\AdminMainViewModel.cs" />
+    <Compile Include="ViewModels\Admin\admin\AdminMainViewModel.cs" />
+    <Compile Include="ViewModels\Admin\admin\QuanLyHoaDonViewModel.cs" />
+    <Compile Include="ViewModels\Admin\admin\QuanLyKhachViewModel.cs" />
+    <Compile Include="ViewModels\Admin\admin\QuanLyPhongViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyKhachViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyPhongViewModel.cs" />
+    <Compile Include="ViewModels\Admin\QuanLyHoaDonViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\User\TimKiemPhongViewModel.cs" />
     <Compile Include="ViewModels\User\UserMainViewModel.cs" />
-    <Compile Include="Views\Admin\UserControls\QuanLyPhong.xaml.cs">
-      <DependentUpon>QuanLyPhong.xaml</DependentUpon>
+    <Compile Include="Services\DataService.cs" />
+    <Compile Include="Views\Admin\AdminWindow.xaml.cs">
+      <DependentUpon>AdminWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyKhachUC.xaml.cs">
+      <DependentUpon>QuanLyKhachUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyPhongUC.xaml.cs">
+      <DependentUpon>QuanLyPhongUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyHoaDonUC.xaml.cs">
+      <DependentUpon>QuanLyHoaDonUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Admin\UserControls\UserControl1.xaml.cs">
       <DependentUpon>UserControl1.xaml</DependentUpon>
@@ -80,7 +96,19 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\Admin\UserControls\QuanLyPhong.xaml">
+    <Page Include="Views\Admin\AdminWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyPhongUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyKhachUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyHoaDonUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -102,13 +130,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\HoaDon.cs" />
     <Compile Include="Models\HopDong.cs" />
     <Compile Include="Models\KhachThue.cs" />
-    <Compile Include="Models\NhaTroModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NhaTroModel.edmx</DependentUpon>
-    </Compile>
     <Compile Include="Models\PhongTro.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -127,10 +151,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EntityDeploy Include="Models\NhaTroModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>NhaTroModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

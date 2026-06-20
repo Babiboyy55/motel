@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace Quanlynhatro.ViewModels
 {
     /// <summary>
-    /// BaseViewModel - Core MVVM base class với INotifyPropertyChanged
+    /// BaseViewModel - Core MVVM base class v?i INotifyPropertyChanged
     /// </summary>
     public class BaseViewModel : INotifyPropertyChanged
     {
