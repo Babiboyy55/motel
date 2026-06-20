@@ -88,18 +88,11 @@
     <Compile Include="Models\NhatKyHoatDong.cs" />
     <Compile Include="Models\NhaTroDbContext.cs" />
     <Compile Include="ViewModels\Admin\AdminMainViewModel.cs" />
-    <Compile Include="ViewModels\Admin\admin\AdminMainViewModel.cs" />
-    <Compile Include="ViewModels\Admin\admin\QuanLyHoaDonViewModel.cs" />
-    <Compile Include="ViewModels\Admin\admin\QuanLyKhachViewModel.cs" />
-    <Compile Include="ViewModels\Admin\admin\QuanLyPhongViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyKhachViewModel.cs" />
-    <Compile Include="ViewModels\Admin\QuanLyNguoiDungViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyPhongViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyHoaDonViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
-    <Compile Include="ViewModels\User\TimKiemPhongViewModel.cs" />
-    <Compile Include="ViewModels\User\UserMainViewModel.cs" />
     <Compile Include="Services\DataService.cs" />
     <Compile Include="Views\Admin\AdminWindow.xaml.cs">
       <DependentUpon>AdminWindow.xaml</DependentUpon>
@@ -150,7 +143,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\HoaDon.cs" />
     <Compile Include="Models\HopDong.cs" />
     <Compile Include="Models\KhachThue.cs" />
     <Compile Include="Models\PhongTro.cs" />

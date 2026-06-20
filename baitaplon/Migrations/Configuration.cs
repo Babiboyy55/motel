@@ -1,4 +1,4 @@
-﻿namespace baitaplon.Migrations
+namespace baitaplon.Migrations
 {
     using baitaplon.Models;
     using Quanlynhatro.Models;
@@ -42,23 +42,24 @@
             }
 
             // 2. DỮ LIỆU TEST: PHÂN HỆ 3.5 (HỢP ĐỒNG & CẢNH BÁO)
+            /*
             context.HopDongs.AddOrUpdate(
-                h => h.HopDongID, // Giữ nguyên HopDongID theo file trước đó của bạn
-                new HopDong { HopDongID = 1, KhachID = 1, PhongID = 101, NgayBatDau = DateTime.Now.AddMonths(-5), NgayKetThuc = DateTime.Now.AddMonths(6), GiaCoDinh = 3000000, TrangThai = "Hoạt động" },
-                new HopDong { HopDongID = 2, KhachID = 2, PhongID = 102, NgayBatDau = DateTime.Now.AddMonths(-11), NgayKetThuc = DateTime.Now.AddDays(15), GiaCoDinh = 2500000, TrangThai = "Hoạt động" }
+                h => h.HopDongID, 
+                new HopDong { HopDongID = 1, KhachID = 1, PhongID = 101, NgayBatDau = DateTime.Now.AddMonths(-5), NgayKetThuc = DateTime.Now.AddMonths(6), GiaThue = 3000000, TrangThai = "Hoạt động" },
+                new HopDong { HopDongID = 2, KhachID = 2, PhongID = 102, NgayBatDau = DateTime.Now.AddMonths(-11), NgayKetThuc = DateTime.Now.AddDays(15), GiaThue = 2500000, TrangThai = "Hoạt động" }
             );
+            */
 
             // 3. DỮ LIỆU TEST: PHÂN HỆ 3.4 (DASHBOARD)
+            /*
             string thangNay = $"{DateTime.Now.Month:D2}/{DateTime.Now.Year}";
 
-            // - Khóa chính là Id, Khóa ngoại là HopDongId
-            // - Hóa đơn 1 (Đã thu): SoTienDaTra = TongTien (Code tự tính Công nợ = 0)
-            // - Hóa đơn 2 (Chưa thu): SoTienDaTra = 0 (Code tự tính Công nợ = TongTien)
             context.HoaDons.AddOrUpdate(
-                h => h.Id,
-                new HoaDon { Id = 1, HopDongId = 1, ThangNam = thangNay, TongTien = 3500000, SoTienDaTra = 3500000, TrangThai = "DaThanhToan" },
-                new HoaDon { Id = 2, HopDongId = 2, ThangNam = thangNay, TongTien = 2800000, SoTienDaTra = 0, TrangThai = "ChuaThanhToan" }
+                h => h.HoaDonID,
+                new HoaDon { HoaDonID = 1, PhongID = 1, Thang = DateTime.Now.Month, Nam = DateTime.Now.Year, TienThue = 3500000, SoTienDaTra = 3500000, TrangThai = "Đã thanh toán" },
+                new HoaDon { HoaDonID = 2, PhongID = 2, Thang = DateTime.Now.Month, Nam = DateTime.Now.Year, TienThue = 2800000, SoTienDaTra = 0, TrangThai = "Chưa thanh toán" }
             );
+            */
 
             // 4. CHỐT LƯU TOÀN BỘ XUỐNG DATABASE
             context.SaveChanges();

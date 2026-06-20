@@ -1,60 +1,7 @@
-﻿<Window x:Class="baitaplon.MainWindow"
+<Window x:Class="baitaplon.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        
-        xmlns:vm="clr-namespace:baitaplon.ViewModels.Admin"
-        xmlns:uc="clr-namespace:baitaplon.Views.Admin.UserControls"
-        
-        Title="Phần Mềm Quản Lý Nhà Trọ" Height="768" Width="1024" WindowStartupLocation="CenterScreen">
-
-    <Window.DataContext>
-        <vm:AdminMainViewModel/>
-    </Window.DataContext>
-
-    <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-            <uc:DashboardView/>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:QuanLyHopDongViewModel}">
-            <uc:QuanLyHopDongView/>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:QuanLyNguoiDungViewModel}">
-            <uc:QuanLyNguoiDungView/>
-        </DataTemplate>
-    </Window.Resources>
-
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Border Grid.Column="0" Background="#2C3E50">
-            <StackPanel>
-                <TextBlock Text="NOVA MOTEL" Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,30,0,50"/>
-
-                <TextBlock Text="MENU QUẢN TRỊ" Foreground="#7F8C8D" FontSize="12" FontWeight="SemiBold" Margin="20,0,0,10"/>
-
-                <Button Content="📊 Dashboard &amp; Báo Cáo" 
-                        Command="{Binding HienThiDashboardCommand}" 
-                        Background="Transparent" Foreground="White" BorderThickness="0" 
-                        FontSize="16" HorizontalContentAlignment="Left" Padding="20,15" Cursor="Hand"/>
-
-                <Button Content="📝 Quản Lý Hợp Đồng" 
-                        Command="{Binding HienThiHopDongCommand}" 
-                        Background="Transparent" Foreground="White" BorderThickness="0" 
-                        FontSize="16" HorizontalContentAlignment="Left" Padding="20,15" Cursor="Hand"/>
-
-                <Button Content="👥 Quản Lý Người Dùng" 
-                        Command="{Binding HienThiNguoiDungCommand}"
-                        Background="Transparent" Foreground="White" BorderThickness="0" 
-                        FontSize="16" HorizontalContentAlignment="Left" Padding="20,15" Cursor="Hand"/>
-            </StackPanel>
-        </Border>
-
-        <ContentControl Grid.Column="1" Content="{Binding CurrentView}" Background="#F5F6FA" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
-
     </Grid>
 </Window>
