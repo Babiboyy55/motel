@@ -1,4 +1,4 @@
-﻿using baitaplon.Models;
+using baitaplon.Models;
 using Quanlynhatro.Models;
 using Quanlynhatro.ViewModels;
 using System;
@@ -84,7 +84,7 @@ namespace baitaplon.ViewModels.Admin
 
             // B. Quét Hóa đơn chưa thanh toán (Nhắc thu tiền)
             var hoaDonChuaDong = _context.HoaDons
-                .Where(h => h.TrangThai != "DaThanhToan")
+                .Where(h => h.TrangThai != "Đã thanh toán")
                 .ToList();
 
             foreach (var hd in hoaDonChuaDong)

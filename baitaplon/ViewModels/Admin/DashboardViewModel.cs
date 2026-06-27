@@ -1,4 +1,5 @@
-﻿using baitaplon.Models;
+using baitaplon.Models;
+using Quanlynhatro.Models;
 using Quanlynhatro.ViewModels;
 using System;
 using System.Linq;
@@ -111,7 +112,7 @@ namespace baitaplon.ViewModels.Admin
         {
             // 1. Thống kê Phòng (Giữ nguyên)
             TongSoPhong = _context.PhongTros.Count();
-            SoPhongTrong = _context.PhongTros.Count(p => p.TrangThai == "Trong");
+            SoPhongTrong = _context.PhongTros.Count(p => p.TrangThai == TrangThaiPhong.Trong);
             if (TongSoPhong > 0) TyLeLapDay = Math.Round((double)(TongSoPhong - SoPhongTrong) / TongSoPhong * 100, 2);
 
             // 2. Định dạng lại chuỗi tháng năm được chọn từ ComboBox (Ví dụ: "06/2026")
@@ -119,20 +120,20 @@ namespace baitaplon.ViewModels.Admin
 
             // 3. Truy vấn lấy theo tháng được lọc
             DoanhThuThangNay = _context.HoaDons
-                .Where(h => h.ThangNam == thangDuocChon && h.TrangThai == "DaThanhToan")
-                .Select(h => h.TongTien)
-                .DefaultIfEmpty(0)
-                .Sum();
+                .Where(h => h.Thang == ThangLoc && h.Nam == NamLoc && h.TrangThai == "Đã thanh toán")
+                .ToList()
+                .Sum(h => h.TongTien);
 
             // 4. Kéo danh sách nợ và lịch sử thanh toán (Cập nhật logic lấy theo tháng luôn nếu bạn muốn)
-            TongCongNo = _context.HoaDons.Where(h => h.TrangThai != "DaThanhToan").ToList().Sum(h => h.CongNo);
+            TongCongNo = _context.HoaDons.Where(h => h.TrangThai != "Đã thanh toán").ToList().Sum(h => h.CongNo);
 
             DanhSachCongNo = new ObservableCollection<HoaDon>(_context.HoaDons
-                .Where(h => h.TrangThai != "DaThanhToan")
-                .OrderByDescending(h => h.TongTien).ToList());
+                .Where(h => h.TrangThai != "Đã thanh toán")
+                .ToList()
+                .OrderByDescending(h => h.TongTien));
 
             LichSuThanhToan = new ObservableCollection<HoaDon>(_context.HoaDons
-                .Where(h => h.TrangThai == "DaThanhToan" && h.ThangNam == thangDuocChon)
+                .Where(h => h.TrangThai == "Đã thanh toán" && h.Thang == ThangLoc && h.Nam == NamLoc)
                 .OrderByDescending(h => h.NgayThanhToan).ToList());
         }
 

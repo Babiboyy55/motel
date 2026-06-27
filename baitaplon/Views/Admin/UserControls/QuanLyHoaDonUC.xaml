@@ -77,8 +77,9 @@
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Padding" Value="6,2"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="CaretBrush" Value="Black"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -125,23 +126,31 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="GridLinesVisibility" Value="All"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0"/>
-            <Setter Property="VerticalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#CCCCCC"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#CCCCCC"/>
             <Setter Property="RowBackground" Value="White"/>
-            <Setter Property="AlternatingRowBackground" Value="#F9F9F9"/>
+            <Setter Property="AlternatingRowBackground" Value="#F9FAFB"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="CanUserAddRows" Value="False"/>
             <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="RowHeight" Value="28"/>
+            <Style.Resources>
+                <!-- Overrides default inactive selection colors to prevent faded white text when losing focus -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#E2E8F0"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="Black"/>
+            </Style.Resources>
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#E5E7EB"/>
+            <Setter Property="Background" Value="#F2F2F2"/>
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Padding" Value="6,4"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
         </Style>
@@ -151,17 +160,44 @@
             <Setter Property="Foreground" Value="Black"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#B3D7FF"/>
+                    <Setter Property="Background" Value="#E2E8F0"/>
                     <Setter Property="Foreground" Value="Black"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F2F2F2"/>
+                    <Setter Property="Background" Value="#F1F5F9"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+        
         <Style TargetType="DataGridCell">
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Cell alignment styles -->
+        <Style x:Key="LeftAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+        </Style>
+        <Style x:Key="CenterAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="RightAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+        <Style x:Key="BoldRightAlignStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignStyle}">
+            <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Resources>
 
@@ -191,6 +227,8 @@
                             Command="{Binding XoaHoaDonCommand}" IsEnabled="{Binding CoHoaDonDangChon}"/>
                     <Button Content="💳 Ghi nhận thanh toán" Style="{StaticResource SuccessBtn}" Margin="0,0,6,0"
                             Command="{Binding MoThanhToanCommand}" IsEnabled="{Binding CoHoaDonDangChon}"/>
+                    <Button Content="📄 Xuất hóa đơn" Style="{StaticResource SecondaryBtn}" Margin="0,0,6,0"
+                            Command="{Binding XuatHoaDonExcelCommand}" IsEnabled="{Binding CoHoaDonDangChon}"/>
                     <Button Content="➕ Thêm thủ công" Style="{StaticResource SecondaryBtn}" Margin="0,0,6,0"
                             Command="{Binding ThemHoaDonThuCongCommand}"/>
                     <Button Content="⚡ Tạo hóa đơn tự động" Style="{StaticResource PrimaryBtn}"
@@ -265,66 +303,66 @@
                 <DataGrid ItemsSource="{Binding DanhSachHoaDon}" SelectedItem="{Binding HoaDonDangChon}"
                           Style="{StaticResource GridStyle}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mã HĐ" Binding="{Binding HoaDonID}" Width="55"/>
-                        <DataGridTextColumn Header="Phòng" Binding="{Binding TenPhong}" Width="65"/>
-                        <DataGridTextColumn Header="Khách thuê đại diện" Binding="{Binding TenKhach}" Width="130"/>
-                        <DataGridTextColumn Header="Kỳ hóa đơn" Binding="{Binding ThangNamText}" Width="85"/>
-                        <DataGridTextColumn Header="Tiền thuê" Width="90">
+                        <DataGridTextColumn Header="Mã HĐ" Binding="{Binding HoaDonID}" Width="70" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Phòng" Binding="{Binding TenPhong}" Width="80" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Khách thuê đại diện" Binding="{Binding TenKhach}" Width="160" ElementStyle="{StaticResource LeftAlignStyle}"/>
+                        <DataGridTextColumn Header="Kỳ hóa đơn" Binding="{Binding ThangNamText}" Width="100" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Tiền thuê" Width="110" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TienThue" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
                         
                         <!-- Điện -->
-                        <DataGridTextColumn Header="Điện đầu" Binding="{Binding ChiSoDienDau}" Width="75"/>
-                        <DataGridTextColumn Header="Điện cuối" Binding="{Binding ChiSoDienCuoi}" Width="75"/>
-                        <DataGridTextColumn Header="Kwh dùng" Binding="{Binding SoDienTieuThu}" Width="75"/>
-                        <DataGridTextColumn Header="Tiền điện" Width="85">
+                        <DataGridTextColumn Header="Điện đầu" Binding="{Binding ChiSoDienDau}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Điện cuối" Binding="{Binding ChiSoDienCuoi}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Kwh dùng" Binding="{Binding SoDienTieuThu}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Tiền điện" Width="105" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TienDien" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
                         
                         <!-- Nước -->
-                        <DataGridTextColumn Header="Nước đầu" Binding="{Binding ChiSoNuocDau}" Width="75"/>
-                        <DataGridTextColumn Header="Nước cuối" Binding="{Binding ChiSoNuocCuoi}" Width="75"/>
-                        <DataGridTextColumn Header="Tiền nước" Width="85">
+                        <DataGridTextColumn Header="Nước đầu" Binding="{Binding ChiSoNuocDau}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Nước cuối" Binding="{Binding ChiSoNuocCuoi}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                        <DataGridTextColumn Header="Tiền nước" Width="105" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TienNuoc" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
                         
                         <!-- Phí khác -->
-                        <DataGridTextColumn Header="Internet" Width="75">
+                        <DataGridTextColumn Header="Internet" Width="95" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TienInternet" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Xe + Rác" Width="75">
+                        <DataGridTextColumn Header="Xe + Rác" Width="95" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TienRac" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
                         
                         <!-- Tổng -->
-                        <DataGridTextColumn Header="TỔNG TIỀN" Width="105">
+                        <DataGridTextColumn Header="TỔNG TIỀN" Width="125" ElementStyle="{StaticResource BoldRightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="TongTien" StringFormat="{}{0:N0} đ"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Đã trả" Width="85">
+                        <DataGridTextColumn Header="Đã trả" Width="105" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="SoTienDaTra" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Còn nợ" Width="85">
+                        <DataGridTextColumn Header="Còn nợ" Width="105" ElementStyle="{StaticResource RightAlignStyle}">
                             <DataGridTextColumn.Binding>
                                 <Binding Path="ConNo" StringFormat="{}{0:N0}"/>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
                         
                         <!-- Trạng thái -->
-                        <DataGridTemplateColumn Header="Trạng thái" Width="110">
+                        <DataGridTemplateColumn Header="Trạng thái" Width="130">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center" Margin="2">
@@ -512,7 +550,8 @@
                         <TextBlock Text="Ghi chú hóa đơn" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormHoaDon.GhiChu, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="40"
-                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"
+                                 VerticalContentAlignment="Top"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Hủy bỏ" Command="{Binding HuyHoaDonCommand}" Width="80" Margin="0,0,6,0"

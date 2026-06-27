@@ -1,4 +1,4 @@
-﻿using Quanlynhatro.Models;
+using Quanlynhatro.Models;
 using System.Data.Entity;
 
 namespace baitaplon.Models
@@ -9,6 +9,7 @@ namespace baitaplon.Models
         // Chỉ định EF đọc chuỗi kết nối "DefaultConnection" từ file App.config
         public NhaTroDbContext() : base("name=DefaultConnection")
         {
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<NhaTroDbContext, Migrations.Configuration>());
         }
 
         public DbSet<NguoiDung> NguoiDungs { get; set; }

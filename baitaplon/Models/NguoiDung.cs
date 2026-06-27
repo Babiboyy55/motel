@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace baitaplon.Models
 {
@@ -13,6 +13,9 @@ namespace baitaplon.Models
         // Vai trò: "Admin", "QuanLy", "ThuNgan"
         public string VaiTro { get; set; }
         public bool TrangThai { get; set; }
+        
+        // Số điện thoại nhận OTP khôi phục mật khẩu
+        public string SoDienThoai { get; set; }
 
         public virtual ICollection<NhatKyHoatDong> NhatKyHoatDongs { get; set; }
     }

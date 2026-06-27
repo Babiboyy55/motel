@@ -8,7 +8,6 @@ namespace Quanlynhatro.Views.Admin
         public AdminWindow()
         {
             InitializeComponent();
-            this.DataContext = new AdminMainViewModel();
         }
     }
 }

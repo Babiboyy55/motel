@@ -77,8 +77,9 @@
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Padding" Value="6,2"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="CaretBrush" Value="Black"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -125,23 +126,31 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="GridLinesVisibility" Value="All"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0"/>
-            <Setter Property="VerticalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#CCCCCC"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#CCCCCC"/>
             <Setter Property="RowBackground" Value="White"/>
-            <Setter Property="AlternatingRowBackground" Value="#F9F9F9"/>
+            <Setter Property="AlternatingRowBackground" Value="#F9FAFB"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="CanUserAddRows" Value="False"/>
             <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="RowHeight" Value="28"/>
+            <Style.Resources>
+                <!-- Overrides default inactive selection colors to prevent faded white text when losing focus -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#E2E8F0"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="Black"/>
+            </Style.Resources>
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#E5E7EB"/>
+            <Setter Property="Background" Value="#F2F2F2"/>
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Padding" Value="6,4"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
         </Style>
@@ -151,17 +160,44 @@
             <Setter Property="Foreground" Value="Black"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#B3D7FF"/>
+                    <Setter Property="Background" Value="#E2E8F0"/>
                     <Setter Property="Foreground" Value="Black"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F2F2F2"/>
+                    <Setter Property="Background" Value="#F1F5F9"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+        
         <Style TargetType="DataGridCell">
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Cell alignment styles -->
+        <Style x:Key="LeftAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+        </Style>
+        <Style x:Key="CenterAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="RightAlignStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+        <Style x:Key="BoldRightAlignStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignStyle}">
+            <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Resources>
 
@@ -261,27 +297,27 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding DanhSachKhach}" SelectedItem="{Binding KhachDangChon}"
                               Style="{StaticResource GridStyle}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Mã KH" Binding="{Binding KhachID}" Width="55"/>
-                            <DataGridTextColumn Header="Họ Tên Khách" Binding="{Binding HoTen}" Width="140"/>
-                            <DataGridTextColumn Header="Giới tính" Binding="{Binding GioiTinh}" Width="70"/>
-                            <DataGridTextColumn Header="Số CCCD" Binding="{Binding CCCD}" Width="110"/>
-                            <DataGridTextColumn Header="Điện thoại" Binding="{Binding SoDienThoai}" Width="105"/>
-                            <DataGridTextColumn Header="Ngày sinh" Width="95">
+                            <DataGridTextColumn Header="Mã KH" Binding="{Binding KhachID}" Width="70" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Họ Tên Khách" Binding="{Binding HoTen}" Width="160" ElementStyle="{StaticResource LeftAlignStyle}"/>
+                            <DataGridTextColumn Header="Giới tính" Binding="{Binding GioiTinh}" Width="85" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Số CCCD" Binding="{Binding CCCD}" Width="125" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Điện thoại" Binding="{Binding SoDienThoai}" Width="115" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Ngày sinh" Width="105" ElementStyle="{StaticResource CenterAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="NgaySinh" StringFormat="dd/MM/yyyy"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Tuổi" Binding="{Binding TuoiText}" Width="55"/>
-                            <DataGridTextColumn Header="Quê quán" Binding="{Binding QueQuan}" Width="110"/>
-                            <DataGridTextColumn Header="Phòng ở" Binding="{Binding PhongID}" Width="65"/>
-                            <DataGridTextColumn Header="Ngày vào ở" Width="95">
+                            <DataGridTextColumn Header="Tuổi" Binding="{Binding TuoiText}" Width="70" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Quê quán" Binding="{Binding QueQuan}" Width="130" ElementStyle="{StaticResource LeftAlignStyle}"/>
+                            <DataGridTextColumn Header="Phòng ở" Binding="{Binding PhongID}" Width="80" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Ngày vào ở" Width="105" ElementStyle="{StaticResource CenterAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="NgayVaoO" StringFormat="dd/MM/yyyy"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Người LH khẩn cấp" Binding="{Binding NguoiLienHeKhan}" Width="130"/>
-                            <DataGridTextColumn Header="SĐT Người LH" Binding="{Binding SoDTNguoiLienHe}" Width="105"/>
-                            <DataGridTemplateColumn Header="Trạng thái" Width="95">
+                            <DataGridTextColumn Header="Người LH khẩn cấp" Binding="{Binding NguoiLienHeKhan}" Width="150" ElementStyle="{StaticResource LeftAlignStyle}"/>
+                            <DataGridTextColumn Header="SĐT Người LH" Binding="{Binding SoDTNguoiLienHe}" Width="115" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTemplateColumn Header="Trạng thái" Width="115">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center" Margin="2">
@@ -341,32 +377,32 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding DanhSachHopDong}" SelectedItem="{Binding HopDongDangChon}"
                               Style="{StaticResource GridStyle}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Mã HĐ" Binding="{Binding HopDongID}" Width="55"/>
-                            <DataGridTextColumn Header="Tên Khách Thuê" Binding="{Binding TenKhach}" Width="140"/>
-                            <DataGridTextColumn Header="Tên Phòng" Binding="{Binding TenPhong}" Width="75"/>
-                            <DataGridTextColumn Header="Ngày bắt đầu" Width="100">
+                            <DataGridTextColumn Header="Mã HĐ" Binding="{Binding HopDongID}" Width="70" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Tên Khách Thuê" Binding="{Binding TenKhach}" Width="160" ElementStyle="{StaticResource LeftAlignStyle}"/>
+                            <DataGridTextColumn Header="Tên Phòng" Binding="{Binding TenPhong}" Width="90" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Ngày bắt đầu" Width="110" ElementStyle="{StaticResource CenterAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="NgayBatDau" StringFormat="dd/MM/yyyy"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Ngày kết thúc" Width="100">
+                            <DataGridTextColumn Header="Ngày kết thúc" Width="110" ElementStyle="{StaticResource CenterAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="NgayKetThuc" StringFormat="dd/MM/yyyy"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Số ngày còn" Binding="{Binding SoThueConLai}" Width="85"/>
-                            <DataGridTextColumn Header="Giá thuê phòng" Width="110">
+                            <DataGridTextColumn Header="Số ngày còn" Binding="{Binding SoThueConLai}" Width="95" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTextColumn Header="Giá thuê phòng" Width="125" ElementStyle="{StaticResource RightAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="GiaThue" StringFormat="{}{0:N0} đ"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Tiền đặt cọc" Width="110">
+                            <DataGridTextColumn Header="Tiền đặt cọc" Width="125" ElementStyle="{StaticResource RightAlignStyle}">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="TienCoc" StringFormat="{}{0:N0} đ"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Đã trả cọc" Binding="{Binding DaHoanCoc}" Width="85"/>
-                            <DataGridTemplateColumn Header="Trạng thái" Width="100">
+                            <DataGridTextColumn Header="Đã trả cọc" Binding="{Binding DaHoanCoc}" Width="95" ElementStyle="{StaticResource CenterAlignStyle}"/>
+                            <DataGridTemplateColumn Header="Trạng thái" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center" Margin="2">
@@ -553,7 +589,8 @@
                         <TextBlock Text="Ghi chú thông tin thêm" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormKhach.GhiChu, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="50" 
-                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"
+                                 VerticalContentAlignment="Top"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Hủy bỏ" Command="{Binding HuyKhachCommand}" Width="80" Margin="0,0,6,0"
@@ -644,13 +681,15 @@
                         <TextBlock Text="Các điều khoản quy định" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormHopDong.DieuKhoan, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="70"
-                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,12"/>
+                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,12"
+                                 VerticalContentAlignment="Top"/>
 
                         <!-- Ghi chú -->
                         <TextBlock Text="Ghi chú hợp đồng" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormHopDong.GhiChu, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="40"
-                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+                                 TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"
+                                 VerticalContentAlignment="Top"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Hủy bỏ" Command="{Binding HuyHopDongCommand}" Width="80" Margin="0,0,6,0"

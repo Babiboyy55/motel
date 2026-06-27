@@ -1,6 +1,6 @@
 using Quanlynhatro.ViewModels;
 using Quanlynhatro.Models;
-using Quanlynhatro.Services;
+using baitaplon.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Windows.Input;
 namespace Quanlynhatro.ViewModels.Admin
 {
     /// <summary>
-    /// QuanLyPhongViewModel - Hoàn thiện CRUD phòng trọ
+    /// QuanLyPhongViewModel - CRUD phòng trọ kết nối SQL Server thông qua Entity Framework
     /// </summary>
     public class QuanLyPhongViewModel : BaseViewModel
     {
@@ -81,11 +81,42 @@ namespace Quanlynhatro.ViewModels.Admin
 
         public bool CoPhongDangChon => PhongDangChon != null;
 
-        // Thống kê
-        public int SoPhongTong => DataService.DanhSachPhong.Count;
-        public int SoPhongTrong => DataService.SoPhongTrong();
-        public int SoPhongDangThue => DataService.SoPhongDangThue();
-        public int SoPhongSuaChua => DataService.DanhSachPhong.Count(p => p.TrangThai == TrangThaiPhong.DangSuaChua);
+        // Thống kê (Lấy trực tiếp từ Database)
+        public int SoPhongTong
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.PhongTros.Count();
+            }
+        }
+
+        public int SoPhongTrong
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.PhongTros.Count(p => p.TrangThai == TrangThaiPhong.Trong);
+            }
+        }
+
+        public int SoPhongDangThue
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.PhongTros.Count(p => p.TrangThai == TrangThaiPhong.DangThue);
+            }
+        }
+
+        public int SoPhongSuaChua
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.PhongTros.Count(p => p.TrangThai == TrangThaiPhong.DangSuaChua);
+            }
+        }
 
         // ComboBox items
         public string[] DanhSachTrangThai => new[] { "Tất cả", "Trống", "Đang thuê", "Đang sửa chữa", "Đang dọn" };
@@ -103,8 +134,6 @@ namespace Quanlynhatro.ViewModels.Admin
 
         public QuanLyPhongViewModel()
         {
-            _danhSachPhongGoc = DataService.DanhSachPhong;
-            DanhSachPhong = new ObservableCollection<PhongTro>(_danhSachPhongGoc);
             LocTrangThai = "Tất cả";
 
             ThemPhongCommand = new RelayCommand(o => MoFormThem());
@@ -113,10 +142,30 @@ namespace Quanlynhatro.ViewModels.Admin
             LuuPhongCommand = new RelayCommand(o => LuuPhong());
             HuyCommand = new RelayCommand(o => DongForm());
             DoiTrangThaiCommand = new RelayCommand(o => DoiTrangThai(o?.ToString()), o => PhongDangChon != null);
+
+            TaiDuLieuTuDatabase();
+        }
+
+        private void TaiDuLieuTuDatabase()
+        {
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    var List = db.PhongTros.ToList();
+                    _danhSachPhongGoc = new ObservableCollection<PhongTro>(List);
+                    TimKiem();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải dữ liệu phòng trọ: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TimKiem()
         {
+            if (_danhSachPhongGoc == null) return;
             var ds = _danhSachPhongGoc.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(TuKhoaTimKiem))
@@ -140,7 +189,7 @@ namespace Quanlynhatro.ViewModels.Admin
         private void MoFormSua()
         {
             if (PhongDangChon == null) return;
-            // Clone để tránh thay đổi trực tiếp
+            // Clone để tránh thay đổi trực tiếp trên UI trước khi lưu
             FormPhong = new PhongTro
             {
                 PhongID = PhongDangChon.PhongID,
@@ -181,14 +230,53 @@ namespace Quanlynhatro.ViewModels.Admin
                 return;
             }
 
-            if (IsEditMode)
-                DataService.SuaPhong(FormPhong);
-            else
-                DataService.ThemPhong(FormPhong);
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    if (IsEditMode)
+                    {
+                        var existing = db.PhongTros.Find(FormPhong.PhongID);
+                        if (existing != null)
+                        {
+                            existing.TenPhong = FormPhong.TenPhong;
+                            existing.LoaiPhong = FormPhong.LoaiPhong;
+                            existing.Tang = FormPhong.Tang;
+                            existing.DienTich = FormPhong.DienTich;
+                            existing.GiaThue = FormPhong.GiaThue;
+                            existing.GiaDien = FormPhong.GiaDien;
+                            existing.GiaNuoc = FormPhong.GiaNuoc;
+                            existing.GiaInternet = FormPhong.GiaInternet;
+                            existing.GiaRac = FormPhong.GiaRac;
+                            existing.GiaXeMay = FormPhong.GiaXeMay;
+                            existing.TrangThai = FormPhong.TrangThai;
+                            existing.TrangThaiNoiThat = FormPhong.TrangThaiNoiThat;
+                            existing.MoTa = FormPhong.MoTa;
+                            existing.CoWifi = FormPhong.CoWifi;
+                            existing.CoMayGiat = FormPhong.CoMayGiat;
+                            existing.CoBep = FormPhong.CoBep;
+                            existing.CoGiuXeMay = FormPhong.CoGiuXeMay;
+                            existing.CoDieuHoa = FormPhong.CoDieuHoa;
+                            existing.CoNongLanh = FormPhong.CoNongLanh;
+                            existing.CoTuLanh = FormPhong.CoTuLanh;
+                            existing.CoTivi = FormPhong.CoTivi;
+                        }
+                    }
+                    else
+                    {
+                        db.PhongTros.Add(FormPhong);
+                    }
+                    db.SaveChanges();
+                }
 
-            DongForm();
-            LamMoiDanhSach();
-            CapNhatThongKe();
+                DongForm();
+                TaiDuLieuTuDatabase();
+                CapNhatThongKe();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi lưu phòng trọ: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void XoaPhong()
@@ -201,11 +289,27 @@ namespace Quanlynhatro.ViewModels.Admin
             }
             var result = MessageBox.Show($"Bạn có chắc muốn xóa phòng {PhongDangChon.TenPhong}?",
                 "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            
             if (result == MessageBoxResult.Yes)
             {
-                DataService.XoaPhong(PhongDangChon.PhongID);
-                LamMoiDanhSach();
-                CapNhatThongKe();
+                try
+                {
+                    using (var db = new NhaTroDbContext())
+                    {
+                        var existing = db.PhongTros.Find(PhongDangChon.PhongID);
+                        if (existing != null)
+                        {
+                            db.PhongTros.Remove(existing);
+                            db.SaveChanges();
+                        }
+                    }
+                    TaiDuLieuTuDatabase();
+                    CapNhatThongKe();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xóa phòng trọ: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -220,19 +324,28 @@ namespace Quanlynhatro.ViewModels.Admin
                 "Đang dọn" => TrangThaiPhong.DangDon,
                 _ => PhongDangChon.TrangThai
             };
-            PhongDangChon.TrangThai = newStatus;
-            DataService.SuaPhong(PhongDangChon);
-            LamMoiDanhSach();
-            CapNhatThongKe();
+
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    var existing = db.PhongTros.Find(PhongDangChon.PhongID);
+                    if (existing != null)
+                    {
+                        existing.TrangThai = newStatus;
+                        db.SaveChanges();
+                    }
+                }
+                TaiDuLieuTuDatabase();
+                CapNhatThongKe();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi đổi trạng thái: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DongForm() => IsFormVisible = false;
-
-        private void LamMoiDanhSach()
-        {
-            _danhSachPhongGoc = DataService.DanhSachPhong;
-            TimKiem();
-        }
 
         private void CapNhatThongKe()
         {

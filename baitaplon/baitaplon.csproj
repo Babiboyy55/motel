@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -70,17 +69,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.cs" />
-    <Compile Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.Designer.cs">
-      <DependentUpon>202606121311287_TaoBangAdminVaDoanhThu.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.cs" />
-    <Compile Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.Designer.cs">
-      <DependentUpon>202606130213009_CapNhatKhoaChinhPhongVaKhach.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202606191336122_ThemCotTenNguoiDung.cs" />
-    <Compile Include="Migrations\202606191336122_ThemCotTenNguoiDung.Designer.cs">
-      <DependentUpon>202606191336122_ThemCotTenNguoiDung.cs</DependentUpon>
+    <Compile Include="Migrations\202606231340131_InitialCreate.cs" />
+    <Compile Include="Migrations\202606231340131_InitialCreate.Designer.cs">
+      <DependentUpon>202606231340131_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\HoaDon.cs" />
@@ -91,11 +82,21 @@
     <Compile Include="ViewModels\Admin\QuanLyKhachViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyPhongViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyHoaDonViewModel.cs" />
+    <Compile Include="ViewModels\Admin\DashboardViewModel.cs" />
+    <Compile Include="ViewModels\Admin\QuanLyHopDongViewModel.cs" />
+    <Compile Include="ViewModels\Admin\QuanLyNguoiDungViewModel.cs" />
+    <Compile Include="ViewModels\User\TimKiemPhongViewModel.cs" />
+    <Compile Include="ViewModels\User\UserMainViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="Services\DataService.cs" />
+    <Compile Include="Services\SecurityHelper.cs" />
+    <Compile Include="Services\SmsService.cs" />
     <Compile Include="Views\Admin\AdminWindow.xaml.cs">
       <DependentUpon>AdminWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\TaoHopDongWindow.xaml.cs">
+      <DependentUpon>TaoHopDongWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Admin\UserControls\QuanLyKhachUC.xaml.cs">
       <DependentUpon>QuanLyKhachUC.xaml</DependentUpon>
@@ -106,8 +107,23 @@
     <Compile Include="Views\Admin\UserControls\QuanLyHoaDonUC.xaml.cs">
       <DependentUpon>QuanLyHoaDonUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Admin\UserControls\DashboardView.xaml.cs">
+      <DependentUpon>DashboardView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyHopDongView.xaml.cs">
+      <DependentUpon>QuanLyHopDongView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\UserControls\QuanLyNguoiDungView.xaml.cs">
+      <DependentUpon>QuanLyNguoiDungView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Admin\UserControls\UserControl1.xaml.cs">
       <DependentUpon>UserControl1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ForgotPasswordWindow.xaml.cs">
+      <DependentUpon>ForgotPasswordWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -125,6 +141,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Admin\TaoHopDongWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Admin\UserControls\QuanLyPhongUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -137,7 +157,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Admin\UserControls\DashboardView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyHopDongView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\UserControls\QuanLyNguoiDungView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Admin\UserControls\UserControl1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoginWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ForgotPasswordWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -159,14 +199,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\202606121311287_TaoBangAdminVaDoanhThu.resx">
-      <DependentUpon>202606121311287_TaoBangAdminVaDoanhThu.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202606130213009_CapNhatKhoaChinhPhongVaKhach.resx">
-      <DependentUpon>202606130213009_CapNhatKhoaChinhPhongVaKhach.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202606191336122_ThemCotTenNguoiDung.resx">
-      <DependentUpon>202606191336122_ThemCotTenNguoiDung.cs</DependentUpon>
+
+    <EmbeddedResource Include="Migrations\202606231340131_InitialCreate.resx">
+      <DependentUpon>202606231340131_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

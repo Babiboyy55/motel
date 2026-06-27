@@ -7,13 +7,13 @@ namespace baitaplon.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.2")]
-    public sealed partial class CapNhatKhoaChinhPhongVaKhach : IMigrationMetadata
+    public sealed partial class InitialCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(CapNhatKhoaChinhPhongVaKhach));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202606130213009_CapNhatKhoaChinhPhongVaKhach"; }
+            get { return "202606231340131_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

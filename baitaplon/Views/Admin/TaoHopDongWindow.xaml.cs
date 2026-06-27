@@ -1,4 +1,4 @@
-﻿using baitaplon.Models;
+using baitaplon.Models;
 using Quanlynhatro.Models;
 using System;
 using System.Linq;
@@ -43,7 +43,7 @@ namespace baitaplon.Views.Admin
                     KhachID = (int)cmbKhach.SelectedValue,
                     NgayBatDau = dpNgayBatDau.SelectedDate ?? DateTime.Now,
                     NgayKetThuc = dpNgayKetThuc.SelectedDate ?? DateTime.Now.AddMonths(6),
-                    GiaCoDinh = decimal.Parse(txtGiaCoDinh.Text),
+                    GiaThue = decimal.Parse(txtGiaCoDinh.Text),
                     TrangThai = "Hoạt động"
                 };
 

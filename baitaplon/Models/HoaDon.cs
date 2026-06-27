@@ -47,6 +47,10 @@ namespace Quanlynhatro.Models
         public string TrangThai { get; set; }           // "Chưa thanh toán" / "Đã thanh toán" / "Trả một phần"
         public decimal SoTienDaTra { get; set; }        // Số tiền đã thanh toán
         public decimal ConNo => TongTien - SoTienDaTra; // Còn nợ
+        public decimal CongNo => ConNo;
+        public string ThangNam => $"{Thang:D2}/{Nam}";
+        public int? HopDongId { get; set; }
+
         public DateTime? NgayThanhToan { get; set; }    // Ngày thanh toán
         public string HinhThucThanhToan { get; set; }   // Tiền mặt / Chuyển khoản
         public string MaGiaoDich { get; set; }          // Mã giao dịch (chuyển khoản)

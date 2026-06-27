@@ -1,16 +1,18 @@
 using Quanlynhatro.ViewModels;
 using Quanlynhatro.Models;
-using Quanlynhatro.Services;
+using baitaplon.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Win32;
+using MiniExcelLibs;
 
 namespace Quanlynhatro.ViewModels.Admin
 {
     /// <summary>
-    /// QuanLyHoaDonViewModel - Quản lý thu chi, hóa đơn, công nợ
+    /// QuanLyHoaDonViewModel - Quản lý hóa đơn, công nợ, thu tiền kết nối SQL Server qua Entity Framework
     /// </summary>
     public class QuanLyHoaDonViewModel : BaseViewModel
     {
@@ -101,14 +103,65 @@ namespace Quanlynhatro.ViewModels.Admin
 
         public bool CoHoaDonDangChon => HoaDonDangChon != null;
 
-        // Thống kê
-        public decimal TongThuThang => DataService.TongThuThang(ThangLoc, NamLoc);
-        public decimal TongConNo => DataService.TongConNo();
-        public int SoHoaDonChuaThanhToan => DataService.DanhSachHoaDon.Count(h => h.TrangThai == "Chưa thanh toán");
-        public int SoHoaDonDaThanhToan => DataService.DanhSachHoaDon.Count(h => h.TrangThai == "Đã thanh toán" && h.Thang == ThangLoc && h.Nam == NamLoc);
+        // Thống kê thu chi (Lấy trực tiếp từ DB)
+        public decimal TongThuThang
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    return db.HoaDons
+                        .Where(h => h.Thang == ThangLoc && h.Nam == NamLoc && h.TrangThai == "Đã thanh toán")
+                        .ToList()
+                        .Sum(h => h.TongTien);
+                }
+            }
+        }
 
-        // Danh sách phòng cho ComboBox
-        public ObservableCollection<PhongTro> DanhSachPhong => DataService.DanhSachPhong;
+        public decimal TongConNo
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    return db.HoaDons
+                        .Where(h => h.TrangThai != "Đã thanh toán")
+                        .ToList()
+                        .Sum(h => h.ConNo);
+                }
+            }
+        }
+
+        public int SoHoaDonChuaThanhToan
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    return db.HoaDons.Count(h => h.TrangThai == "Chưa thanh toán");
+                }
+            }
+        }
+
+        public int SoHoaDonDaThanhToan
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    return db.HoaDons.Count(h => h.TrangThai == "Đã thanh toán" && h.Thang == ThangLoc && h.Nam == NamLoc);
+                }
+            }
+        }
+
+        // ComboBox items
+        private ObservableCollection<PhongTro> _danhSachPhong;
+        public ObservableCollection<PhongTro> DanhSachPhong
+        {
+            get => _danhSachPhong;
+            set => SetProperty(ref _danhSachPhong, value);
+        }
+
         public string[] DanhSachTrangThaiHD => new[] { "Tất cả", "Chưa thanh toán", "Trả một phần", "Đã thanh toán" };
         public string[] DanhSachHinhThucTT => new[] { "Tiền mặt", "Chuyển khoản", "Ví điện tử" };
         public int[] DanhSachThang => Enumerable.Range(1, 12).ToArray();
@@ -124,6 +177,7 @@ namespace Quanlynhatro.ViewModels.Admin
         public ICommand GhiNhanThanhToanCommand { get; }
         public ICommand MoThanhToanCommand { get; }
         public ICommand HuyThanhToanCommand { get; }
+        public ICommand XuatHoaDonExcelCommand { get; }
 
         public QuanLyHoaDonViewModel()
         {
@@ -141,22 +195,36 @@ namespace Quanlynhatro.ViewModels.Admin
             GhiNhanThanhToanCommand = new RelayCommand(o => GhiNhanThanhToan());
             MoThanhToanCommand = new RelayCommand(o => MoFormThanhToan(), o => HoaDonDangChon != null && HoaDonDangChon.TrangThai != "Đã thanh toán");
             HuyThanhToanCommand = new RelayCommand(o => IsFormThanhToanVisible = false);
+            XuatHoaDonExcelCommand = new RelayCommand(o => XuatHoaDonExcel(), o => HoaDonDangChon != null);
 
             LamMoiDanhSach();
         }
 
         private void TimKiem()
         {
-            var ds = DataService.DanhSachHoaDon.AsEnumerable();
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    // Lấy danh sách phòng cho ComboBox
+                    DanhSachPhong = new ObservableCollection<PhongTro>(db.PhongTros.ToList());
 
-            if (ThangLoc > 0)
-                ds = ds.Where(h => h.Thang == ThangLoc && h.Nam == NamLoc);
+                    var ds = db.HoaDons.AsQueryable();
 
-            if (LocTrangThai != "Tất cả" && !string.IsNullOrEmpty(LocTrangThai))
-                ds = ds.Where(h => h.TrangThai == LocTrangThai);
+                    if (ThangLoc > 0)
+                        ds = ds.Where(h => h.Thang == ThangLoc && h.Nam == NamLoc);
 
-            DanhSachHoaDon = new ObservableCollection<HoaDon>(ds.OrderByDescending(h => h.HoaDonID));
-            CapNhatThongKe();
+                    if (LocTrangThai != "Tất cả" && !string.IsNullOrEmpty(LocTrangThai))
+                        ds = ds.Where(h => h.TrangThai == LocTrangThai);
+
+                    DanhSachHoaDon = new ObservableCollection<HoaDon>(ds.OrderByDescending(h => h.HoaDonID).ToList());
+                    CapNhatThongKe();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải danh sách hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TaoHoaDonTuDong()
@@ -164,15 +232,74 @@ namespace Quanlynhatro.ViewModels.Admin
             var res = MessageBox.Show($"Tạo hóa đơn tự động cho tháng {ThangLoc}/{NamLoc}?\nHệ thống sẽ tạo hóa đơn cho tất cả phòng đang thuê chưa có hóa đơn tháng này.",
                 "Xác nhận tạo hóa đơn", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            if (res == MessageBoxResult.Yes)
+            if (res != MessageBoxResult.Yes) return;
+
+            try
             {
-                var dsHD = DataService.TaoHoaDonTuDong(ThangLoc, NamLoc);
-                if (dsHD.Count == 0)
-                    MessageBox.Show("Tất cả phòng đang thuê đã có hóa đơn tháng này!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                else
-                    MessageBox.Show($"Đã tạo {dsHD.Count} hóa đơn thành công!\nVui lòng nhập chỉ số điện/nước cho từng phòng.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                using (var db = new NhaTroDbContext())
+                {
+                    var dsPhongDangThue = db.PhongTros.Where(p => p.TrangThai == TrangThaiPhong.DangThue).ToList();
+                    int count = 0;
+
+                    foreach (var phong in dsPhongDangThue)
+                    {
+                        // Kiểm tra đã có hóa đơn chưa
+                        bool daCoHD = db.HoaDons.Any(h => h.PhongID == phong.PhongID && h.Thang == ThangLoc && h.Nam == NamLoc);
+                        if (daCoHD) continue;
+
+                        var khach = db.KhachThues.FirstOrDefault(k => k.PhongID == phong.PhongID && k.DangO);
+                        
+                        // Lấy chỉ số cũ
+                        var hdTruoc = db.HoaDons
+                            .Where(h => h.PhongID == phong.PhongID)
+                            .OrderByDescending(h => h.Nam * 100 + h.Thang)
+                            .FirstOrDefault();
+
+                        var hopDong = db.HopDongs
+                            .FirstOrDefault(h => h.PhongID == phong.PhongID && h.TrangThai == "Hoạt động");
+
+                        var hd = new HoaDon
+                        {
+                            PhongID = phong.PhongID,
+                            TenPhong = phong.TenPhong,
+                            TenKhach = khach?.HoTen ?? "(Chưa rõ)",
+                            Thang = ThangLoc,
+                            Nam = NamLoc,
+                            TienThue = phong.GiaThue,
+                            ChiSoDienDau = hdTruoc?.ChiSoDienCuoi ?? 0,
+                            ChiSoDienCuoi = hdTruoc?.ChiSoDienCuoi ?? 0,
+                            GiaDien = phong.GiaDien,
+                            ChiSoNuocDau = hdTruoc?.ChiSoNuocCuoi ?? 0,
+                            ChiSoNuocCuoi = hdTruoc?.ChiSoNuocCuoi ?? 0,
+                            GiaNuoc = phong.GiaNuoc,
+                            TienInternet = phong.GiaInternet,
+                            TienRac = phong.GiaRac,
+                            TienXe = phong.GiaXeMay,
+                            TrangThai = "Chưa thanh toán",
+                            NgayLap = DateTime.Today,
+                            HopDongId = hopDong?.HopDongID
+                        };
+
+                        db.HoaDons.Add(hd);
+                        count++;
+                    }
+
+                    if (count == 0)
+                    {
+                        MessageBox.Show("Tất cả phòng đang thuê đã có hóa đơn tháng này!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        db.SaveChanges();
+                        MessageBox.Show($"Đã tạo {count} hóa đơn thành công!\nVui lòng nhập chỉ số điện/nước cho từng phòng.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
 
                 LamMoiDanhSach();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tạo hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -209,11 +336,17 @@ namespace Quanlynhatro.ViewModels.Admin
                 GhiChuPhiKhac = HoaDonDangChon.GhiChuPhiKhac,
                 TrangThai = HoaDonDangChon.TrangThai,
                 SoTienDaTra = HoaDonDangChon.SoTienDaTra,
-                GhiChu = HoaDonDangChon.GhiChu
+                GhiChu = HoaDonDangChon.GhiChu,
+                HopDongId = HoaDonDangChon.HopDongId
             };
             _isEditHoaDon = true;
-            FormHoaDonTitle = $"SỬA HÓA ĐƠN - {HoaDonDangChon.TenPhong} ({HoaDonDangChon.ThangNamText})";
+            FormFormHoaDonTitle();
             IsFormHoaDonVisible = true;
+        }
+
+        private void FormFormHoaDonTitle()
+        {
+            FormHoaDonTitle = $"SỬA HÓA ĐƠN - {HoaDonDangChon.TenPhong} ({HoaDonDangChon.ThangNamText})";
         }
 
         private void LuuHoaDon()
@@ -225,19 +358,72 @@ namespace Quanlynhatro.ViewModels.Admin
                 return;
             }
 
-            // Gán tên phòng và khách
-            var phong = DataService.DanhSachPhong.FirstOrDefault(p => p.PhongID == FormHoaDon.PhongID);
-            FormHoaDon.TenPhong = phong?.TenPhong;
-            var khach = DataService.DanhSachKhach.FirstOrDefault(k => k.PhongID == FormHoaDon.PhongID && k.DangO);
-            FormHoaDon.TenKhach = khach?.HoTen ?? "(Chưa rõ)";
+            // Ràng buộc nhập liệu chỉ số điện/nước
+            if (FormHoaDon.ChiSoDienCuoi < FormHoaDon.ChiSoDienDau)
+            {
+                MessageBox.Show($"Chỉ số điện cuối kỳ ({FormHoaDon.ChiSoDienCuoi}) không được nhỏ hơn chỉ số điện đầu kỳ ({FormHoaDon.ChiSoDienDau})!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (FormHoaDon.ChiSoNuocCuoi < FormHoaDon.ChiSoNuocDau)
+            {
+                MessageBox.Show($"Chỉ số nước cuối kỳ ({FormHoaDon.ChiSoNuocCuoi}) không được nhỏ hơn chỉ số nước đầu kỳ ({FormHoaDon.ChiSoNuocDau})!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            if (_isEditHoaDon)
-                DataService.SuaHoaDon(FormHoaDon);
-            else
-                DataService.ThemHoaDon(FormHoaDon);
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    var phong = db.PhongTros.Find(FormHoaDon.PhongID);
+                    var khach = db.KhachThues.FirstOrDefault(k => k.PhongID == FormHoaDon.PhongID && k.DangO);
+                    var hopDong = db.HopDongs.FirstOrDefault(h => h.PhongID == FormHoaDon.PhongID && h.TrangThai == "Hoạt động");
 
-            IsFormHoaDonVisible = false;
-            LamMoiDanhSach();
+                    FormHoaDon.TenPhong = phong?.TenPhong;
+                    FormHoaDon.TenKhach = khach?.HoTen ?? "(Chưa rõ)";
+                    FormHoaDon.HopDongId = hopDong?.HopDongID;
+
+                    if (_isEditHoaDon)
+                    {
+                        var existing = db.HoaDons.Find(FormHoaDon.HoaDonID);
+                        if (existing != null)
+                        {
+                            existing.PhongID = FormHoaDon.PhongID;
+                            existing.TenPhong = FormHoaDon.TenPhong;
+                            existing.TenKhach = FormHoaDon.TenKhach;
+                            existing.Thang = FormHoaDon.Thang;
+                            existing.Nam = FormHoaDon.Nam;
+                            existing.TienThue = FormHoaDon.TienThue;
+                            existing.ChiSoDienDau = FormHoaDon.ChiSoDienDau;
+                            existing.ChiSoDienCuoi = FormHoaDon.ChiSoDienCuoi;
+                            existing.GiaDien = FormHoaDon.GiaDien;
+                            existing.ChiSoNuocDau = FormHoaDon.ChiSoNuocDau;
+                            existing.ChiSoNuocCuoi = FormHoaDon.ChiSoNuocCuoi;
+                            existing.GiaNuoc = FormHoaDon.GiaNuoc;
+                            existing.TienInternet = FormHoaDon.TienInternet;
+                            existing.TienRac = FormHoaDon.TienRac;
+                            existing.TienXe = FormHoaDon.TienXe;
+                            existing.PhiKhac = FormHoaDon.PhiKhac;
+                            existing.GhiChuPhiKhac = FormHoaDon.GhiChuPhiKhac;
+                            existing.TrangThai = FormHoaDon.TrangThai;
+                            existing.SoTienDaTra = FormHoaDon.SoTienDaTra;
+                            existing.GhiChu = FormHoaDon.GhiChu;
+                            existing.HopDongId = FormHoaDon.HopDongId;
+                        }
+                    }
+                    else
+                    {
+                        db.HoaDons.Add(FormHoaDon);
+                    }
+                    db.SaveChanges();
+                }
+
+                IsFormHoaDonVisible = false;
+                LamMoiDanhSach();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi lưu hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void XoaHoaDon()
@@ -250,10 +436,26 @@ namespace Quanlynhatro.ViewModels.Admin
             }
             var res = MessageBox.Show($"Xóa hóa đơn phòng {HoaDonDangChon.TenPhong} tháng {HoaDonDangChon.Thang}/{HoaDonDangChon.Nam}?",
                 "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            
             if (res == MessageBoxResult.Yes)
             {
-                DataService.XoaHoaDon(HoaDonDangChon.HoaDonID);
-                LamMoiDanhSach();
+                try
+                {
+                    using (var db = new NhaTroDbContext())
+                    {
+                        var existing = db.HoaDons.Find(HoaDonDangChon.HoaDonID);
+                        if (existing != null)
+                        {
+                            db.HoaDons.Remove(existing);
+                            db.SaveChanges();
+                        }
+                    }
+                    LamMoiDanhSach();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi xóa hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -274,10 +476,32 @@ namespace Quanlynhatro.ViewModels.Admin
                 return;
             }
 
-            DataService.GhiNhanThanhToan(HoaDonDangChon.HoaDonID, SoTienThanhToan, HinhThucThanhToan);
-            IsFormThanhToanVisible = false;
-            MessageBox.Show("Đã ghi nhận thanh toán thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            LamMoiDanhSach();
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    var hd = db.HoaDons.Find(HoaDonDangChon.HoaDonID);
+                    if (hd != null)
+                    {
+                        hd.SoTienDaTra += SoTienThanhToan;
+                        hd.HinhThucThanhToan = HinhThucThanhToan;
+                        hd.NgayThanhToan = DateTime.Now;
+                        if (hd.SoTienDaTra >= hd.TongTien)
+                            hd.TrangThai = "Đã thanh toán";
+                        else
+                            hd.TrangThai = "Trả một phần";
+                        db.SaveChanges();
+                    }
+                }
+
+                IsFormThanhToanVisible = false;
+                MessageBox.Show("Đã ghi nhận thanh toán thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                LamMoiDanhSach();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi ghi nhận thanh toán: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LamMoiDanhSach()
@@ -291,6 +515,55 @@ namespace Quanlynhatro.ViewModels.Admin
             OnPropertyChanged(nameof(TongConNo));
             OnPropertyChanged(nameof(SoHoaDonChuaThanhToan));
             OnPropertyChanged(nameof(SoHoaDonDaThanhToan));
+        }
+
+        private void XuatHoaDonExcel()
+        {
+            if (HoaDonDangChon == null) return;
+
+            var hd = HoaDonDangChon;
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Excel Files|*.xlsx",
+                FileName = $"HoaDon_Phong_{hd.TenPhong}_Thang_{hd.Thang:D2}_{hd.Nam}.xlsx"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var dataToExport = new[]
+                    {
+                        new { KhoanMuc = "HÓA ĐƠN TIỀN PHÒNG & DỊCH VỤ", GiaTri = "" },
+                        new { KhoanMuc = $"Kỳ hóa đơn: {hd.ThangNamText}", GiaTri = "" },
+                        new { KhoanMuc = $"Phòng: {hd.TenPhong}", GiaTri = "" },
+                        new { KhoanMuc = $"Khách thuê đại diện: {hd.TenKhach}", GiaTri = "" },
+                        new { KhoanMuc = "--------------------------------------", GiaTri = "" },
+                        new { KhoanMuc = "Khoản mục chi tiết", GiaTri = "Thành tiền" },
+                        new { KhoanMuc = "1. Tiền thuê phòng", GiaTri = hd.TienThue.ToString("N0") + " đ" },
+                        new { KhoanMuc = $"2. Tiền điện (Số đầu: {hd.ChiSoDienDau}, Số cuối: {hd.ChiSoDienCuoi}, Tiêu thụ: {hd.SoDienTieuThu} kWh, Đơn giá: {hd.GiaDien:N0} đ/kWh)", GiaTri = hd.TienDien.ToString("N0") + " đ" },
+                        new { KhoanMuc = $"3. Tiền nước (Số đầu: {hd.ChiSoNuocDau}, Số cuối: {hd.ChiSoNuocCuoi}, Tiêu thụ: {hd.SoNuocTieuThu} m³, Đơn giá: {hd.GiaNuoc:N0} đ/m³)", GiaTri = hd.TienNuoc.ToString("N0") + " đ" },
+                        new { KhoanMuc = "4. Tiền Internet", GiaTri = hd.TienInternet.ToString("N0") + " đ" },
+                        new { KhoanMuc = "5. Tiền gửi xe", GiaTri = hd.TienXe.ToString("N0") + " đ" },
+                        new { KhoanMuc = "6. Tiền rác & dịch vụ khác", GiaTri = hd.TienRac.ToString("N0") + " đ" },
+                        new { KhoanMuc = "--------------------------------------", GiaTri = "" },
+                        new { KhoanMuc = "TỔNG TIỀN PHẢI THANH TOÁN", GiaTri = hd.TongTien.ToString("N0") + " đ" },
+                        new { KhoanMuc = "Đã thanh toán thực tế", GiaTri = hd.SoTienDaTra.ToString("N0") + " đ" },
+                        new { KhoanMuc = "Còn lại cần đóng", GiaTri = hd.ConNo.ToString("N0") + " đ" },
+                        new { KhoanMuc = "Trạng thái thanh toán", GiaTri = hd.TrangThai },
+                        new { KhoanMuc = $"Ngày thu tiền: {(hd.NgayThanhToan.HasValue ? hd.NgayThanhToan.Value.ToString("dd/MM/yyyy") : "Chưa thanh toán")}", GiaTri = "" },
+                        new { KhoanMuc = $"Hình thức thanh toán: {hd.HinhThucThanhToan ?? "N/A"}", GiaTri = "" },
+                        new { KhoanMuc = $"Ngày lập hóa đơn: {hd.NgayLap.ToString("dd/MM/yyyy")}", GiaTri = "" }
+                    };
+
+                    MiniExcel.SaveAs(dialog.FileName, dataToExport);
+                    MessageBox.Show($"Xuất hóa đơn phòng {hd.TenPhong} thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi xuất hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

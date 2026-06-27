@@ -1,6 +1,6 @@
 using Quanlynhatro.ViewModels;
 using Quanlynhatro.Models;
-using Quanlynhatro.Services;
+using baitaplon.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Windows.Input;
 namespace Quanlynhatro.ViewModels.Admin
 {
     /// <summary>
-    /// QuanLyKhachViewModel - Quản lý khách thuê và hợp đồng
+    /// QuanLyKhachViewModel - Quản lý khách thuê và hợp đồng kết nối SQL Server qua Entity Framework
     /// </summary>
     public class QuanLyKhachViewModel : BaseViewModel
     {
@@ -32,6 +32,10 @@ namespace Quanlynhatro.ViewModels.Admin
         private bool _isFormHopDongVisible;
         private bool _isEditHopDong;
         private string _formHopDongTitle;
+
+        // Caching list gốc để tìm kiếm
+        private ObservableCollection<KhachThue> _danhSachKhachGoc;
+        private ObservableCollection<HopDong> _danhSachHopDongGoc;
 
         public ObservableCollection<KhachThue> DanhSachKhach
         {
@@ -110,13 +114,45 @@ namespace Quanlynhatro.ViewModels.Admin
         public bool CoKhachDangChon => KhachDangChon != null;
         public bool CoHopDongDangChon => HopDongDangChon != null;
 
-        // Thống kê
-        public int TongSoKhach => DataService.DanhSachKhach.Count(k => k.DangO);
-        public int SoHopDongHoatDong => DataService.DanhSachHopDong.Count(h => h.TrangThai == "Hoạt động");
-        public int SoHopDongSapHetHan => DataService.DanhSachHopDong.Count(h => h.TrangThai == "Hoạt động" && h.NgayKetThuc <= DateTime.Today.AddDays(30));
+        // Thống kê (Truy vấn DB trực tiếp)
+        public int TongSoKhach
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.KhachThues.Count(k => k.DangO);
+            }
+        }
+
+        public int SoHopDongHoatDong
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                    return db.HopDongs.Count(h => h.TrangThai == "Hoạt động");
+            }
+        }
+
+        public int SoHopDongSapHetHan
+        {
+            get
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    DateTime threshold = DateTime.Today.AddDays(30);
+                    return db.HopDongs.Count(h => h.TrangThai == "Hoạt động" && h.NgayKetThuc <= threshold);
+                }
+            }
+        }
 
         // Danh sách phòng cho ComboBox
-        public ObservableCollection<PhongTro> DanhSachPhong => DataService.DanhSachPhong;
+        private ObservableCollection<PhongTro> _danhSachPhong;
+        public ObservableCollection<PhongTro> DanhSachPhong
+        {
+            get => _danhSachPhong;
+            set => SetProperty(ref _danhSachPhong, value);
+        }
+
         public string[] DanhSachGioiTinh => new[] { "Nam", "Nữ", "Khác" };
         public string[] DanhSachQuanHe => new[] { "Bố", "Mẹ", "Anh", "Chị", "Em", "Vợ", "Chồng", "Bạn bè", "Khác" };
 
@@ -136,9 +172,6 @@ namespace Quanlynhatro.ViewModels.Admin
 
         public QuanLyKhachViewModel()
         {
-            DanhSachKhach = new ObservableCollection<KhachThue>(DataService.DanhSachKhach);
-            DanhSachHopDong = new ObservableCollection<HopDong>(DataService.DanhSachHopDong);
-
             ThemKhachCommand = new RelayCommand(o => MoFormThemKhach());
             SuaKhachCommand = new RelayCommand(o => MoFormSuaKhach(), o => KhachDangChon != null);
             XoaKhachCommand = new RelayCommand(o => XoaKhach(), o => KhachDangChon != null);
@@ -150,26 +183,51 @@ namespace Quanlynhatro.ViewModels.Admin
             ChamDutHopDongCommand = new RelayCommand(o => ChamDutHopDong(), o => HopDongDangChon?.TrangThai == "Hoạt động");
             LuuHopDongCommand = new RelayCommand(o => LuuHopDong());
             HuyHopDongCommand = new RelayCommand(o => IsFormHopDongVisible = false);
+
+            TaiDuLieuTuDatabase();
+        }
+
+        private void TaiDuLieuTuDatabase()
+        {
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    _danhSachKhachGoc = new ObservableCollection<KhachThue>(db.KhachThues.ToList());
+                    _danhSachHopDongGoc = new ObservableCollection<HopDong>(db.HopDongs.ToList());
+                    DanhSachPhong = new ObservableCollection<PhongTro>(db.PhongTros.ToList());
+                    
+                    TimKiem();
+                    CapNhatThongKe();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải dữ liệu khách thuê/hợp đồng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TimKiem()
         {
+            if (_danhSachKhachGoc == null || _danhSachHopDongGoc == null) return;
+
             if (string.IsNullOrWhiteSpace(TuKhoaTimKiem))
             {
-                DanhSachKhach = new ObservableCollection<KhachThue>(DataService.DanhSachKhach);
-                DanhSachHopDong = new ObservableCollection<HopDong>(DataService.DanhSachHopDong);
+                DanhSachKhach = new ObservableCollection<KhachThue>(_danhSachKhachGoc);
+                DanhSachHopDong = new ObservableCollection<HopDong>(_danhSachHopDongGoc);
             }
             else
             {
                 string kw = TuKhoaTimKiem.ToLower();
+                
                 DanhSachKhach = new ObservableCollection<KhachThue>(
-                    DataService.DanhSachKhach.Where(k =>
+                    _danhSachKhachGoc.Where(k =>
                         (k.HoTen?.ToLower().Contains(kw) ?? false) ||
                         (k.CCCD?.Contains(kw) ?? false) ||
                         (k.SoDienThoai?.Contains(kw) ?? false)));
 
                 DanhSachHopDong = new ObservableCollection<HopDong>(
-                    DataService.DanhSachHopDong.Where(h =>
+                    _danhSachHopDongGoc.Where(h =>
                         (h.TenKhach?.ToLower().Contains(kw) ?? false) ||
                         (h.TenPhong?.Contains(kw) ?? false)));
             }
@@ -178,7 +236,7 @@ namespace Quanlynhatro.ViewModels.Admin
         // ---- Khách ----
         private void MoFormThemKhach()
         {
-            FormKhach = new KhachThue();
+            FormKhach = new KhachThue { NgayVaoO = DateTime.Today, DangO = true };
             _isEditKhach = false;
             FormKhachTitle = "THÊM KHÁCH THUÊ MỚI";
             IsFormKhachVisible = true;
@@ -220,14 +278,49 @@ namespace Quanlynhatro.ViewModels.Admin
                 return;
             }
 
-            if (_isEditKhach)
-                DataService.SuaKhach(FormKhach);
-            else
-                DataService.ThemKhach(FormKhach);
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    if (_isEditKhach)
+                    {
+                        var existing = db.KhachThues.Find(FormFormKhachId(FormKhach));
+                        if (existing != null)
+                        {
+                            existing.HoTen = FormKhach.HoTen;
+                            existing.CCCD = FormKhach.CCCD;
+                            existing.SoDienThoai = FormKhach.SoDienThoai;
+                            existing.Email = FormKhach.Email;
+                            existing.NgaySinh = FormKhach.NgaySinh;
+                            existing.GioiTinh = FormKhach.GioiTinh;
+                            existing.QueQuan = FormKhach.QueQuan;
+                            existing.DiaChiHienTai = FormKhach.DiaChiHienTai;
+                            existing.NguoiLienHeKhan = FormKhach.NguoiLienHeKhan;
+                            existing.QuanHeNguoiLienHe = FormKhach.QuanHeNguoiLienHe;
+                            existing.SoDTNguoiLienHe = FormKhach.SoDTNguoiLienHe;
+                            existing.PhongID = FormKhach.PhongID;
+                            existing.NgayVaoO = FormKhach.NgayVaoO;
+                            existing.DangO = FormKhach.DangO;
+                            existing.GhiChu = FormKhach.GhiChu;
+                        }
+                    }
+                    else
+                    {
+                        db.KhachThues.Add(FormKhach);
+                    }
+                    db.SaveChanges();
+                }
 
-            IsFormKhachVisible = false;
-            LamMoiDanhSach();
+                IsFormKhachVisible = false;
+                TaiDuLieuTuDatabase();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi lưu khách thuê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        private int FormFormKhachId(KhachThue form) => form.KhachID;
 
         private void XoaKhach()
         {
@@ -240,15 +333,30 @@ namespace Quanlynhatro.ViewModels.Admin
             var res = MessageBox.Show($"Xóa khách '{KhachDangChon.HoTen}'?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res == MessageBoxResult.Yes)
             {
-                DataService.XoaKhach(KhachDangChon.KhachID);
-                LamMoiDanhSach();
+                try
+                {
+                    using (var db = new NhaTroDbContext())
+                    {
+                        var existing = db.KhachThues.Find(KhachDangChon.KhachID);
+                        if (existing != null)
+                        {
+                            db.KhachThues.Remove(existing);
+                            db.SaveChanges();
+                        }
+                    }
+                    TaiDuLieuTuDatabase();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xóa khách thuê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         // ---- Hợp Đồng ----
         private void MoFormThemHopDong()
         {
-            FormHopDong = new HopDong();
+            FormHopDong = new HopDong { NgayBatDau = DateTime.Today, NgayKetThuc = DateTime.Today.AddMonths(12), TrangThai = "Hoạt động" };
             _isEditHopDong = false;
             FormHopDongTitle = "TẠO HỢP ĐỒNG MỚI";
             IsFormHopDongVisible = true;
@@ -287,20 +395,57 @@ namespace Quanlynhatro.ViewModels.Admin
                 return;
             }
 
-            // Gán tên khách, tên phòng
-            var khach = DataService.DanhSachKhach.FirstOrDefault(k => k.KhachID == FormHopDong.KhachID);
-            var phong = DataService.DanhSachPhong.FirstOrDefault(p => p.PhongID == FormHopDong.PhongID);
-            FormHopDong.TenKhach = khach?.HoTen;
-            FormHopDong.TenPhong = phong?.TenPhong;
-            FormHopDong.GiaThue = phong?.GiaThue ?? FormHopDong.GiaThue;
+            try
+            {
+                using (var db = new NhaTroDbContext())
+                {
+                    // Lấy tên khách, tên phòng từ CSDL
+                    var khach = db.KhachThues.Find(FormHopDong.KhachID);
+                    var phong = db.PhongTros.Find(FormHopDong.PhongID);
+                    FormHopDong.TenKhach = khach?.HoTen;
+                    FormHopDong.TenPhong = phong?.TenPhong;
+                    FormHopDong.GiaThue = phong?.GiaThue ?? FormHopDong.GiaThue;
 
-            if (_isEditHopDong)
-                DataService.SuaHopDong(FormHopDong);
-            else
-                DataService.ThemHopDong(FormHopDong);
+                    if (_isEditHopDong)
+                    {
+                        var existing = db.HopDongs.Find(FormHopDong.HopDongID);
+                        if (existing != null)
+                        {
+                            existing.KhachID = FormHopDong.KhachID;
+                            existing.PhongID = FormHopDong.PhongID;
+                            existing.TenKhach = FormHopDong.TenKhach;
+                            existing.TenPhong = FormHopDong.TenPhong;
+                            existing.NgayBatDau = FormHopDong.NgayBatDau;
+                            existing.NgayKetThuc = FormHopDong.NgayKetThuc;
+                            existing.GiaThue = FormHopDong.GiaThue;
+                            existing.TienCoc = FormHopDong.TienCoc;
+                            existing.DaHoanCoc = FormHopDong.DaHoanCoc;
+                            existing.DieuKhoan = FormHopDong.DieuKhoan;
+                            existing.TrangThai = FormHopDong.TrangThai;
+                            existing.GhiChu = FormHopDong.GhiChu;
+                        }
+                    }
+                    else
+                    {
+                        db.HopDongs.Add(FormHopDong);
+                        
+                        // Khi tạo hợp đồng mới -> Cập nhật trạng thái phòng thành Đang thuê
+                        if (phong != null)
+                        {
+                            phong.TrangThai = TrangThaiPhong.DangThue;
+                        }
+                    }
+                    
+                    db.SaveChanges();
+                }
 
-            IsFormHopDongVisible = false;
-            LamMoiDanhSach();
+                IsFormHopDongVisible = false;
+                TaiDuLieuTuDatabase();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi lưu hợp đồng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ChamDutHopDong()
@@ -308,18 +453,41 @@ namespace Quanlynhatro.ViewModels.Admin
             if (HopDongDangChon == null) return;
             var res = MessageBox.Show($"Chấm dứt hợp đồng #{HopDongDangChon.HopDongID} với phòng {HopDongDangChon.TenPhong}?\nPhòng sẽ được chuyển về trạng thái Trống.",
                 "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            
             if (res == MessageBoxResult.Yes)
             {
-                DataService.ChamDutHopDong(HopDongDangChon.HopDongID);
-                LamMoiDanhSach();
+                try
+                {
+                    using (var db = new NhaTroDbContext())
+                    {
+                        var hd = db.HopDongs.Find(HopDongDangChon.HopDongID);
+                        if (hd != null)
+                        {
+                            hd.TrangThai = "Đã chấm dứt";
+                            
+                            // Cập nhật phòng tương ứng thành Trống
+                            var phong = db.PhongTros.Find(hd.PhongID);
+                            if (phong != null)
+                            {
+                                phong.TrangThai = TrangThaiPhong.Trong;
+                            }
+                            
+                            // Cập nhật khách thuê tương ứng thành đã ra ở
+                            var khach = db.KhachThues.Find(hd.KhachID);
+                            if (khach != null)
+                            {
+                                khach.DangO = false;
+                            }
+                        }
+                        db.SaveChanges();
+                    }
+                    TaiDuLieuTuDatabase();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi chấm dứt hợp đồng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-        }
-
-        private void LamMoiDanhSach()
-        {
-            DanhSachKhach = new ObservableCollection<KhachThue>(DataService.DanhSachKhach);
-            DanhSachHopDong = new ObservableCollection<HopDong>(DataService.DanhSachHopDong);
-            CapNhatThongKe();
         }
 
         private void CapNhatThongKe()
