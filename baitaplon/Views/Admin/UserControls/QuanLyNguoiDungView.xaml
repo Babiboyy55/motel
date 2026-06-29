@@ -27,6 +27,8 @@
 
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
                     <Button Content="+ Cấp Tài Khoản Mới" Command="{Binding MoFormThemCommand}" Background="#27AE60" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Margin="0,0,10,0"/>
+                    <Button Content="✏️ Sửa Tài Khoản" Command="{Binding MoFormSuaCommand}" Background="#2980B9" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Margin="0,0,10,0" IsEnabled="{Binding CoTaiKhoanDangChon}"/>
+                    <Button Content="🗑️ Xóa Tài Khoản" Command="{Binding XoaTaiKhoanCommand}" Background="#C0392B" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Margin="0,0,10,0" IsEnabled="{Binding CoTaiKhoanDangChon}"/>
                     <Button Content="{Binding NutKhoaText}" Command="{Binding KhoaMoKhoaCommand}" Background="{Binding NutKhoaMau}" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
                 </StackPanel>
 
@@ -93,10 +95,8 @@
                 </ListView>
             </Grid>
         </Border>
-
-        <!-- Overlay Dialog Form for Adding User -->
         <Grid Background="#80000000" Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000" Grid.ColumnSpan="2" Margin="-20">
-            <Border Background="White" CornerRadius="10" Width="400" Height="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="25">
+            <Border Background="White" CornerRadius="10" Width="400" Height="Auto" MaxHeight="550" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="25">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="15" ShadowDepth="2" Color="Black" Opacity="0.2"/>
                 </Border.Effect>
@@ -107,17 +107,18 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="CẤP TÀI KHOẢN MỚI" FontSize="20" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                    <TextBlock Text="{Binding FormTitle}" FontSize="20" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,0,0,15"/>
 
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
                         <TextBlock Text="Tên đăng nhập" Margin="0,0,0,5" FontWeight="SemiBold" Foreground="#34495E"/>
-                        <TextBox Text="{Binding TenDangNhapInput, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5,0" Margin="0,0,0,12" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding TenDangNhapInput, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsEditMode}" Height="35" Padding="5,0" Margin="0,0,0,12" VerticalContentAlignment="Center"/>
 
                         <TextBlock Text="Họ và tên" Margin="0,0,0,5" FontWeight="SemiBold" Foreground="#34495E"/>
                         <TextBox Text="{Binding TenNguoiDungInput, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5,0" Margin="0,0,0,12" VerticalContentAlignment="Center"/>
 
                         <TextBlock Text="Mật khẩu" Margin="0,0,0,5" FontWeight="SemiBold" Foreground="#34495E"/>
                         <TextBox Text="{Binding MatKhauInput, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5,0" Margin="0,0,0,12" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="(Để trống nếu không muốn đổi mật khẩu khi sửa)" FontSize="11" Foreground="#7F8C8D" Margin="0,-8,0,12" Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVis}}"/>
 
                         <TextBlock Text="Số điện thoại" Margin="0,0,0,5" FontWeight="SemiBold" Foreground="#34495E"/>
                         <TextBox Text="{Binding SoDienThoaiInput, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5,0" Margin="0,0,0,12" VerticalContentAlignment="Center"/>
@@ -128,11 +129,10 @@
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
                         <Button Content="Hủy" Command="{Binding HuyCommand}" Background="#7F8C8D" Foreground="White" Width="107" Height="38" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="Button_Click"/>
-                        <Button Content="Cấp tài khoản" Command="{Binding LuuTaiKhoanCommand}" Background="#27AE60" Foreground="White" Width="130" Height="38" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="{Binding FormSaveButtonText}" Command="{Binding LuuTaiKhoanCommand}" Background="#27AE60" Foreground="White" Width="130" Height="38" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
                     </StackPanel>
                 </Grid>
             </Border>
-            <StackPanel/>
         </Grid>
     </Grid>
 </UserControl>

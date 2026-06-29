@@ -51,7 +51,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ========================= SIDEBAR ========================= -->
         <Border Grid.Column="0" Background="#F0F2F5" BorderBrush="#D0D0D0" BorderThickness="0,0,1,0">
             <DockPanel>
                 <!-- Logo & User Info -->
@@ -235,7 +234,6 @@
             </DockPanel>
         </Border>
 
-        <!-- ========================= CONTENT AREA ========================= -->
         <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}">
             <ContentControl.Resources>
                 <!-- Phân hệ Tổng quan (baitaplon namespace) -->

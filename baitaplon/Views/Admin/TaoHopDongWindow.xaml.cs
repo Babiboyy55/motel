@@ -37,13 +37,22 @@ namespace baitaplon.Views.Admin
             // 2. Lưu xuống Database
             using (var db = new NhaTroDbContext())
             {
+                var selectedPhongId = (int)cmbPhong.SelectedValue;
+                var selectedKhachId = (int)cmbKhach.SelectedValue;
+
+                var phong = db.PhongTros.FirstOrDefault(p => p.PhongID == selectedPhongId);
+                var khach = db.KhachThues.FirstOrDefault(k => k.KhachID == selectedKhachId);
+
                 var hopDongMoi = new HopDong
                 {
-                    PhongID = (int)cmbPhong.SelectedValue,
-                    KhachID = (int)cmbKhach.SelectedValue,
+                    PhongID = selectedPhongId,
+                    KhachID = selectedKhachId,
+                    TenPhong = phong?.TenPhong ?? "",
+                    TenKhach = khach?.HoTen ?? "",
                     NgayBatDau = dpNgayBatDau.SelectedDate ?? DateTime.Now,
                     NgayKetThuc = dpNgayKetThuc.SelectedDate ?? DateTime.Now.AddMonths(6),
                     GiaThue = decimal.Parse(txtGiaCoDinh.Text),
+                    TienCoc = decimal.Parse(txtGiaCoDinh.Text), // Mặc định cọc = 1 tháng tiền nhà
                     TrangThai = "Hoạt động"
                 };
 

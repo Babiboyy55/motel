@@ -42,6 +42,7 @@ namespace baitaplon.ViewModels.Admin
                 OnPropertyChanged(); 
                 OnPropertyChanged(nameof(NutKhoaText));
                 OnPropertyChanged(nameof(NutKhoaMau));
+                OnPropertyChanged(nameof(CoTaiKhoanDangChon));
             }
         }
 
@@ -52,6 +53,24 @@ namespace baitaplon.ViewModels.Admin
             get => _isFormVisible;
             set { _isFormVisible = value; OnPropertyChanged(); }
         }
+
+        // Trạng thái Form (Thêm mới hay Sửa)
+        private bool _isEditMode;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set 
+            { 
+                _isEditMode = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(FormTitle));
+                OnPropertyChanged(nameof(FormSaveButtonText));
+            }
+        }
+
+        public string FormTitle => IsEditMode ? "CẬP NHẬT TÀI KHOẢN" : "CẤP TÀI KHOẢN MỚI";
+        public string FormSaveButtonText => IsEditMode ? "Lưu thay đổi" : "Cấp tài khoản";
+        public bool CoTaiKhoanDangChon => NguoiDungDangChon != null;
 
         // 5. Các Input fields của Form
         private string _tenDangNhapInput;
@@ -97,9 +116,11 @@ namespace baitaplon.ViewModels.Admin
 
         // 7. Commands
         public ICommand MoFormThemCommand { get; }
+        public ICommand MoFormSuaCommand { get; }
         public ICommand LuuTaiKhoanCommand { get; }
         public ICommand HuyCommand { get; }
         public ICommand KhoaMoKhoaCommand { get; }
+        public ICommand XoaTaiKhoanCommand { get; }
 
         public QuanLyNguoiDungViewModel() : this(null)
         {
@@ -117,9 +138,11 @@ namespace baitaplon.ViewModels.Admin
 
             // Khởi tạo Commands
             MoFormThemCommand = new RelayCommand(o => MoFormThem());
+            MoFormSuaCommand = new RelayCommand(o => MoFormSua(), o => NguoiDungDangChon != null);
             LuuTaiKhoanCommand = new RelayCommand(o => LuuTaiKhoan());
             HuyCommand = new RelayCommand(o => Huy());
             KhoaMoKhoaCommand = new RelayCommand(o => KhoaMoKhoa(), o => NguoiDungDangChon != null);
+            XoaTaiKhoanCommand = new RelayCommand(o => XoaTaiKhoan(), o => NguoiDungDangChon != null);
 
             TaiDuLieu();
         }
@@ -141,11 +164,25 @@ namespace baitaplon.ViewModels.Admin
 
         private void MoFormThem()
         {
+            IsEditMode = false;
             TenDangNhapInput = "";
             TenNguoiDungInput = "";
             MatKhauInput = "";
             SoDienThoaiInput = "";
             VaiTroInput = "ThuNgan";
+            IsFormVisible = true;
+        }
+
+        private void MoFormSua()
+        {
+            if (NguoiDungDangChon == null) return;
+            
+            IsEditMode = true;
+            TenDangNhapInput = NguoiDungDangChon.TenDangNhap;
+            TenNguoiDungInput = NguoiDungDangChon.TenNguoiDung;
+            MatKhauInput = ""; // Để trống nếu không muốn đổi mật khẩu
+            SoDienThoaiInput = NguoiDungDangChon.SoDienThoai;
+            VaiTroInput = NguoiDungDangChon.VaiTro;
             IsFormVisible = true;
         }
 
@@ -156,57 +193,161 @@ namespace baitaplon.ViewModels.Admin
 
         private void LuuTaiKhoan()
         {
-            if (string.IsNullOrWhiteSpace(TenDangNhapInput) || 
-                string.IsNullOrWhiteSpace(TenNguoiDungInput) || 
-                string.IsNullOrWhiteSpace(MatKhauInput) ||
-                string.IsNullOrWhiteSpace(SoDienThoaiInput))
+            if (IsEditMode)
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin tài khoản bao gồm số điện thoại!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (string.IsNullOrWhiteSpace(TenNguoiDungInput) || 
+                    string.IsNullOrWhiteSpace(SoDienThoaiInput))
+                {
+                    MessageBox.Show("Vui lòng nhập đầy đủ thông tin Họ tên và Số điện thoại!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    var userInDb = _context.NguoiDungs.Find(NguoiDungDangChon.Id);
+                    if (userInDb != null)
+                    {
+                        userInDb.TenNguoiDung = TenNguoiDungInput.Trim();
+                        userInDb.SoDienThoai = SoDienThoaiInput.Trim();
+                        userInDb.VaiTro = VaiTroInput;
+
+                        // Nếu nhập mật khẩu mới thì băm và lưu
+                        if (!string.IsNullOrWhiteSpace(MatKhauInput))
+                        {
+                            userInDb.MatKhau = Services.SecurityHelper.HashPassword(MatKhauInput.Trim());
+                        }
+
+                        // Ghi nhật ký
+                        var log = new NhatKyHoatDong
+                        {
+                            NguoiDungId = _nguoiThucHien?.Id ?? 1,
+                            HanhDong = "Cập nhật tài khoản",
+                            ThoiGian = DateTime.Now,
+                            ChiTiet = $"Cập nhật tài khoản {userInDb.TenDangNhap} (Họ tên: {userInDb.TenNguoiDung}, Vai trò: {VaiTroInput})"
+                        };
+                        _context.NhatKyHoatDongs.Add(log);
+
+                        _context.SaveChanges();
+                        IsFormVisible = false;
+                        TaiDuLieu();
+
+                        MessageBox.Show("Cập nhật tài khoản thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi cập nhật tài khoản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(TenDangNhapInput) || 
+                    string.IsNullOrWhiteSpace(TenNguoiDungInput) || 
+                    string.IsNullOrWhiteSpace(MatKhauInput) ||
+                    string.IsNullOrWhiteSpace(SoDienThoaiInput))
+                {
+                    MessageBox.Show("Vui lòng nhập đầy đủ thông tin tài khoản bao gồm số điện thoại và mật khẩu!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                string username = TenDangNhapInput.Trim();
+
+                // Kiểm tra trùng tên đăng nhập
+                if (_context.NguoiDungs.Any(u => u.TenDangNhap == username))
+                {
+                    MessageBox.Show("Tên đăng nhập đã tồn tại trên hệ thống!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    var newNguoiDung = new NguoiDung
+                    {
+                        TenDangNhap = username,
+                        TenNguoiDung = TenNguoiDungInput.Trim(),
+                        MatKhau = Services.SecurityHelper.HashPassword(MatKhauInput.Trim()),
+                        SoDienThoai = SoDienThoaiInput.Trim(),
+                        VaiTro = VaiTroInput,
+                        TrangThai = true
+                    };
+
+                    _context.NguoiDungs.Add(newNguoiDung);
+
+                    // Ghi nhật ký
+                    var log = new NhatKyHoatDong
+                    {
+                        NguoiDungId = _nguoiThucHien?.Id ?? 1,
+                        HanhDong = "Cấp tài khoản mới",
+                        ThoiGian = DateTime.Now,
+                        ChiTiet = $"Cấp tài khoản {username} với vai trò {VaiTroInput}"
+                    };
+                    _context.NhatKyHoatDongs.Add(log);
+
+                    _context.SaveChanges();
+                    IsFormVisible = false;
+                    TaiDuLieu();
+
+                    MessageBox.Show("Cấp tài khoản mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi cấp tài khoản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void XoaTaiKhoan()
+        {
+            if (NguoiDungDangChon == null) return;
+
+            if (_nguoiThucHien != null && NguoiDungDangChon.Id == _nguoiThucHien.Id)
+            {
+                MessageBox.Show("Bạn không thể tự xóa tài khoản của chính mình!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            string username = TenDangNhapInput.Trim();
-
-            // Kiểm tra trùng tên đăng nhập
-            if (_context.NguoiDungs.Any(u => u.TenDangNhap == username))
+            if (NguoiDungDangChon.TenDangNhap == "admin")
             {
-                MessageBox.Show("Tên đăng nhập đã tồn tại trên hệ thống!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Không thể xóa tài khoản quản trị hệ thống (admin)!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản '{NguoiDungDangChon.TenDangNhap}' không?\nHành động này không thể hoàn tác!", 
+                "Xác nhận xóa tài khoản", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
 
             try
             {
-                var newNguoiDung = new NguoiDung
+                var userInDb = _context.NguoiDungs.Find(NguoiDungDangChon.Id);
+                if (userInDb != null)
                 {
-                    TenDangNhap = username,
-                    TenNguoiDung = TenNguoiDungInput.Trim(),
-                    MatKhau = Services.SecurityHelper.HashPassword(MatKhauInput.Trim()),
-                    SoDienThoai = SoDienThoaiInput.Trim(),
-                    VaiTro = VaiTroInput,
-                    TrangThai = true
-                };
+                    // Xóa các nhật ký hoạt động liên quan tới user này trước để tránh lỗi khóa ngoại (Foreign Key Constraint)
+                    var logs = _context.NhatKyHoatDongs.Where(n => n.NguoiDungId == userInDb.Id).ToList();
+                    _context.NhatKyHoatDongs.RemoveRange(logs);
 
-                _context.NguoiDungs.Add(newNguoiDung);
+                    _context.NguoiDungs.Remove(userInDb);
 
-                // Ghi nhật ký
-                var log = new NhatKyHoatDong
-                {
-                    NguoiDungId = _nguoiThucHien?.Id ?? 1,
-                    HanhDong = "Cấp tài khoản mới",
-                    ThoiGian = DateTime.Now,
-                    ChiTiet = $"Cấp tài khoản {username} với vai trò {VaiTroInput}"
-                };
-                _context.NhatKyHoatDongs.Add(log);
+                    // Ghi nhật ký
+                    var log = new NhatKyHoatDong
+                    {
+                        NguoiDungId = _nguoiThucHien?.Id ?? 1,
+                        HanhDong = "Xóa tài khoản",
+                        ThoiGian = DateTime.Now,
+                        ChiTiet = $"Đã xóa tài khoản {userInDb.TenDangNhap} (Họ tên: {userInDb.TenNguoiDung})"
+                    };
+                    _context.NhatKyHoatDongs.Add(log);
 
-                _context.SaveChanges();
-                IsFormVisible = false;
-                TaiDuLieu();
+                    _context.SaveChanges();
+                    NguoiDungDangChon = null;
+                    TaiDuLieu();
 
-                MessageBox.Show("Cấp tài khoản mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Xóa tài khoản thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi cấp tài khoản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi xóa tài khoản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

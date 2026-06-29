@@ -11,24 +11,49 @@
     <Window.Resources>
         <!-- Style cho Button Đăng nhập -->
         <Style x:Key="LoginBtnStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1A73E8"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#6366F1" Offset="0"/>
+                        <GradientStop Color="#4F46E5" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1557B0"/>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#4F46E5" Offset="0"/>
+                                            <GradientStop Color="#4338CA" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#0F3C80"/>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#4338CA" Offset="0"/>
+                                            <GradientStop Color="#3730A3" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#CBD5E1"/>
+                                <Setter Property="Foreground" Value="#94A3B8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -39,7 +64,7 @@
         <!-- Style cho Nút Close/Exit -->
         <Style x:Key="CloseBtnStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#5F6368"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -50,19 +75,41 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#F1F3F4"/>
-                                <Setter Property="Foreground" Value="#D93025"/>
+                                <Setter TargetName="border" Property="Background" Value="#F1F5F9"/>
+                                <Setter Property="Foreground" Value="#EF4444"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Style cho các Container Border của TextBox/PasswordBox -->
+        <Style x:Key="InputContainerStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="#6366F1"/>
+                    <Setter Property="Background" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
-    <Border CornerRadius="15" Background="#FFFFFF" BorderBrush="#DADCE0" BorderThickness="1" Margin="10,10,10,-21">
+    <Border CornerRadius="16" BorderBrush="#E2E8F0" BorderThickness="1" Margin="15">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFFFFF" Offset="0.8"/>
+                <GradientStop Color="#EEF2F6" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="15" ShadowDepth="0" Opacity="0.15"/>
+            <DropShadowEffect Color="#6366F1" BlurRadius="25" ShadowDepth="0" Opacity="0.12"/>
         </Border.Effect>
 
         <Grid Margin="25">
@@ -84,41 +131,41 @@
                     Click="BtnClose_Click" Margin="0,-10,-10,0"/>
 
             <!-- Header Title -->
-            <StackPanel Grid.Row="0" Margin="0,10,0,25" HorizontalAlignment="Center">
-                <TextBlock Text="🏠" FontSize="36" HorizontalAlignment="Center"/>
-                <TextBlock Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="18" FontWeight="Bold" Foreground="#1A73E8" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                <TextBlock Text="Phần mềm Quản lý Nhà trọ" FontSize="11" Foreground="#5F6368" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+            <StackPanel Grid.Row="0" Margin="0,5,0,20" HorizontalAlignment="Center">
+                <Path Data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" Fill="#6366F1" Width="40" Height="40" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="18" FontWeight="Bold" Foreground="#4F46E5" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                <TextBlock Text="Phần mềm Quản lý Nhà trọ" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,2,0,0"/>
             </StackPanel>
 
             <!-- Input Fields -->
             <StackPanel Grid.Row="1">
                 <!-- Username -->
-                <TextBlock Text="Tên đăng nhập" FontSize="12" FontWeight="SemiBold" Foreground="#3C4043" Margin="0,0,0,6"/>
-                <Border BorderBrush="#DADCE0" BorderThickness="1" CornerRadius="5" Background="#F8F9FA" Padding="8,5" Margin="0,0,0,15">
-                    <TextBox x:Name="txtUsername" BorderThickness="0" Background="Transparent" FontSize="13" Foreground="Black" KeyDown="Input_KeyDown"/>
+                <TextBlock Text="Tên đăng nhập" FontSize="12" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,6"/>
+                <Border Style="{StaticResource InputContainerStyle}">
+                    <TextBox x:Name="txtUsername" BorderThickness="0" Background="Transparent" FontSize="13" Foreground="Black" CaretBrush="Black" KeyDown="Input_KeyDown"/>
                 </Border>
 
                 <!-- Password -->
-                <TextBlock Text="Mật khẩu" FontSize="12" FontWeight="SemiBold" Foreground="#3C4043" Margin="0,0,0,6"/>
-                <Border BorderBrush="#DADCE0" BorderThickness="1" CornerRadius="5" Background="#F8F9FA" Padding="8,5" Margin="0,0,0,10">
-                    <PasswordBox x:Name="txtPassword" BorderThickness="0" Background="Transparent" FontSize="13" Foreground="Black" KeyDown="Input_KeyDown"/>
+                <TextBlock Text="Mật khẩu" FontSize="12" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,6"/>
+                <Border Style="{StaticResource InputContainerStyle}" Margin="0,0,0,10">
+                    <PasswordBox x:Name="txtPassword" BorderThickness="0" Background="Transparent" FontSize="13" Foreground="Black" CaretBrush="Black" KeyDown="Input_KeyDown"/>
                 </Border>
 
                 <!-- Remember Me & Forgot Password Link -->
                 <Grid Margin="0,5,0,0">
-                    <CheckBox x:Name="chkRememberMe" Content="Ghi nhớ tài khoản" FontSize="11" Foreground="#5F6368" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="chkRememberMe" Content="Ghi nhớ tài khoản" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Hyperlink Click="HlForgotPassword_Click" Foreground="#1A73E8" TextDecorations="None" FontSize="11" FontWeight="SemiBold">Quên mật khẩu?</Hyperlink>
+                        <Hyperlink Click="HlForgotPassword_Click" Foreground="#4F46E5" TextDecorations="None" FontSize="11" FontWeight="SemiBold">Quên mật khẩu?</Hyperlink>
                     </TextBlock>
                 </Grid>
             </StackPanel>
 
             <!-- Error message text block -->
-            <TextBlock x:Name="lblError" Grid.Row="2" Text="" Foreground="#D93025" FontSize="12" Margin="0,12,0,0" HorizontalAlignment="Center" FontWeight="Medium" TextWrapping="Wrap"/>
+            <TextBlock x:Name="lblError" Grid.Row="2" Text="" Foreground="#EF4444" FontSize="12" Margin="0,8,0,0" HorizontalAlignment="Center" FontWeight="Medium" TextWrapping="Wrap"/>
 
             <!-- Actions -->
-            <Grid Grid.Row="3" Margin="0,20,0,0" VerticalAlignment="Bottom">
-                <Button x:Name="btnLogin" Content="ĐĂNG NHẬP" Style="{StaticResource LoginBtnStyle}" Height="40" Click="BtnLogin_Click" Margin="0,-6,0,6"/>
+            <Grid Grid.Row="3" Margin="0,15,0,0" VerticalAlignment="Bottom">
+                <Button x:Name="btnLogin" Content="ĐĂNG NHẬP" Style="{StaticResource LoginBtnStyle}" Height="40" Click="BtnLogin_Click" Margin="0,0,0,0"/>
             </Grid>
         </Grid>
     </Border>

@@ -177,7 +177,7 @@ namespace Quanlynhatro.ViewModels.Admin
         public ICommand GhiNhanThanhToanCommand { get; }
         public ICommand MoThanhToanCommand { get; }
         public ICommand HuyThanhToanCommand { get; }
-        public ICommand XuatHoaDonExcelCommand { get; }
+        public ICommand XuatHoaDonCommand { get; }
 
         public QuanLyHoaDonViewModel()
         {
@@ -195,7 +195,7 @@ namespace Quanlynhatro.ViewModels.Admin
             GhiNhanThanhToanCommand = new RelayCommand(o => GhiNhanThanhToan());
             MoThanhToanCommand = new RelayCommand(o => MoFormThanhToan(), o => HoaDonDangChon != null && HoaDonDangChon.TrangThai != "Đã thanh toán");
             HuyThanhToanCommand = new RelayCommand(o => IsFormThanhToanVisible = false);
-            XuatHoaDonExcelCommand = new RelayCommand(o => XuatHoaDonExcel(), o => HoaDonDangChon != null);
+            XuatHoaDonCommand = new RelayCommand(o => XuatHoaDon(), o => HoaDonDangChon != null);
 
             LamMoiDanhSach();
         }
@@ -517,53 +517,409 @@ namespace Quanlynhatro.ViewModels.Admin
             OnPropertyChanged(nameof(SoHoaDonDaThanhToan));
         }
 
-        private void XuatHoaDonExcel()
+        private void XuatHoaDon()
         {
             if (HoaDonDangChon == null) return;
 
             var hd = HoaDonDangChon;
             var dialog = new SaveFileDialog
             {
-                Filter = "Excel Files|*.xlsx",
-                FileName = $"HoaDon_Phong_{hd.TenPhong}_Thang_{hd.Thang:D2}_{hd.Nam}.xlsx"
+                Filter = "Hóa đơn Web/PDF (*.html)|*.html|Hóa đơn văn bản (*.txt)|*.txt",
+                FileName = $"HoaDon_Phong_{hd.TenPhong}_Thang_{hd.Thang:D2}_{hd.Nam}"
             };
 
             if (dialog.ShowDialog() == true)
             {
                 try
                 {
-                    var dataToExport = new[]
-                    {
-                        new { KhoanMuc = "HÓA ĐƠN TIỀN PHÒNG & DỊCH VỤ", GiaTri = "" },
-                        new { KhoanMuc = $"Kỳ hóa đơn: {hd.ThangNamText}", GiaTri = "" },
-                        new { KhoanMuc = $"Phòng: {hd.TenPhong}", GiaTri = "" },
-                        new { KhoanMuc = $"Khách thuê đại diện: {hd.TenKhach}", GiaTri = "" },
-                        new { KhoanMuc = "--------------------------------------", GiaTri = "" },
-                        new { KhoanMuc = "Khoản mục chi tiết", GiaTri = "Thành tiền" },
-                        new { KhoanMuc = "1. Tiền thuê phòng", GiaTri = hd.TienThue.ToString("N0") + " đ" },
-                        new { KhoanMuc = $"2. Tiền điện (Số đầu: {hd.ChiSoDienDau}, Số cuối: {hd.ChiSoDienCuoi}, Tiêu thụ: {hd.SoDienTieuThu} kWh, Đơn giá: {hd.GiaDien:N0} đ/kWh)", GiaTri = hd.TienDien.ToString("N0") + " đ" },
-                        new { KhoanMuc = $"3. Tiền nước (Số đầu: {hd.ChiSoNuocDau}, Số cuối: {hd.ChiSoNuocCuoi}, Tiêu thụ: {hd.SoNuocTieuThu} m³, Đơn giá: {hd.GiaNuoc:N0} đ/m³)", GiaTri = hd.TienNuoc.ToString("N0") + " đ" },
-                        new { KhoanMuc = "4. Tiền Internet", GiaTri = hd.TienInternet.ToString("N0") + " đ" },
-                        new { KhoanMuc = "5. Tiền gửi xe", GiaTri = hd.TienXe.ToString("N0") + " đ" },
-                        new { KhoanMuc = "6. Tiền rác & dịch vụ khác", GiaTri = hd.TienRac.ToString("N0") + " đ" },
-                        new { KhoanMuc = "--------------------------------------", GiaTri = "" },
-                        new { KhoanMuc = "TỔNG TIỀN PHẢI THANH TOÁN", GiaTri = hd.TongTien.ToString("N0") + " đ" },
-                        new { KhoanMuc = "Đã thanh toán thực tế", GiaTri = hd.SoTienDaTra.ToString("N0") + " đ" },
-                        new { KhoanMuc = "Còn lại cần đóng", GiaTri = hd.ConNo.ToString("N0") + " đ" },
-                        new { KhoanMuc = "Trạng thái thanh toán", GiaTri = hd.TrangThai },
-                        new { KhoanMuc = $"Ngày thu tiền: {(hd.NgayThanhToan.HasValue ? hd.NgayThanhToan.Value.ToString("dd/MM/yyyy") : "Chưa thanh toán")}", GiaTri = "" },
-                        new { KhoanMuc = $"Hình thức thanh toán: {hd.HinhThucThanhToan ?? "N/A"}", GiaTri = "" },
-                        new { KhoanMuc = $"Ngày lập hóa đơn: {hd.NgayLap.ToString("dd/MM/yyyy")}", GiaTri = "" }
-                    };
+                    string fileExtension = System.IO.Path.GetExtension(dialog.FileName).ToLower();
 
-                    MiniExcel.SaveAs(dialog.FileName, dataToExport);
-                    MessageBox.Show($"Xuất hóa đơn phòng {hd.TenPhong} thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (fileExtension == ".html" || fileExtension == ".htm")
+                    {
+                        string htmlContent = GenerateHtmlInvoice(hd);
+                        System.IO.File.WriteAllText(dialog.FileName, htmlContent, System.Text.Encoding.UTF8);
+                    }
+                    else
+                    {
+                        string txtContent = GenerateTextInvoice(hd);
+                        System.IO.File.WriteAllText(dialog.FileName, txtContent, System.Text.Encoding.UTF8);
+                    }
+
+                    var result = MessageBox.Show($"Xuất hóa đơn phòng {hd.TenPhong} thành công!\nBạn có muốn mở tệp tin hóa đơn vừa xuất không?", 
+                        "Xuất hóa đơn thành công", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = dialog.FileName,
+                            UseShellExecute = true
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Lỗi xuất hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private string GenerateHtmlInvoice(HoaDon hd)
+        {
+            string statusClass = hd.TrangThai == "Đã thanh toán" ? "status-paid" : (hd.TrangThai == "Trả một phần" ? "status-partial" : "status-unpaid");
+            string ngayLapText = hd.NgayLap.ToString("dd/MM/yyyy");
+            string ngayThanhToanText = hd.NgayThanhToan.HasValue ? hd.NgayThanhToan.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa thanh toán";
+            
+            string phiKhacRow = "";
+            if (hd.PhiKhac > 0)
+            {
+                phiKhacRow = $@"
+                <tr>
+                    <td class=""text-center"">7</td>
+                    <td>Phí khác: {hd.GhiChuPhiKhac}</td>
+                    <td class=""text-right"">{hd.PhiKhac.ToString("N0")} đ</td>
+                </tr>";
+            }
+
+            string ghiChuRow = "";
+            if (!string.IsNullOrEmpty(hd.GhiChu))
+            {
+                ghiChuRow = $@"
+                <tr>
+                    <td class=""label"">Ghi chú:</td>
+                    <td colspan=""3"">{hd.GhiChu}</td>
+                </tr>";
+            }
+
+            return $@"<!DOCTYPE html>
+<html lang=""vi"">
+<head>
+    <meta charset=""UTF-8"">
+    <title>Hóa đơn phòng {hd.TenPhong} - {hd.ThangNamText}</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }}
+        .invoice-box {{
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            background-color: #fff;
+            border-radius: 8px;
+        }}
+        .no-print {{
+            text-align: right;
+            margin-bottom: 20px;
+        }}
+        .btn-print {{
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }}
+        .btn-print:hover {{
+            background-color: #0052a3;
+        }}
+        .header {{
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px double #0066cc;
+            padding-bottom: 15px;
+        }}
+        .header h1 {{
+            margin: 0 0 10px 0;
+            color: #0066cc;
+            font-size: 26px;
+            text-transform: uppercase;
+        }}
+        .header p {{
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }}
+        .info-table {{
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }}
+        .info-table td {{
+            padding: 6px 0;
+            vertical-align: top;
+        }}
+        .info-table td.label {{
+            font-weight: bold;
+            width: 150px;
+            color: #555;
+        }}
+        .details-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }}
+        .details-table th {{
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-weight: bold;
+            text-align: left;
+        }}
+        .details-table td {{
+            border: 1px solid #ddd;
+            padding: 10px;
+        }}
+        .details-table tr:nth-child(even) {{
+            background-color: #fafafa;
+        }}
+        .text-right {{
+            text-align: right;
+        }}
+        .text-center {{
+            text-align: center;
+        }}
+        .total-box {{
+            float: right;
+            width: 300px;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }}
+        .total-row {{
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+        }}
+        .total-row.grand-total {{
+            font-size: 18px;
+            font-weight: bold;
+            color: #0066cc;
+            border-top: 2px solid #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding: 10px 0;
+            margin-top: 5px;
+        }}
+        .clear {{
+            clear: both;
+        }}
+        .footer {{
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }}
+        .signature-box {{
+            text-align: center;
+            width: 200px;
+        }}
+        .signature-box .title {{
+            font-weight: bold;
+            margin-bottom: 60px;
+        }}
+        .signature-box .name {{
+            font-style: italic;
+            color: #555;
+        }}
+        .status-badge {{
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }}
+        .status-paid {{
+            background-color: #e6f4ea;
+            color: #137333;
+        }}
+        .status-partial {{
+            background-color: #fef7e0;
+            color: #b06000;
+        }}
+        .status-unpaid {{
+            background-color: #fdf2f2;
+            color: #d93025;
+        }}
+        @media print {{
+            body {{
+                background-color: #fff;
+                padding: 0;
+            }}
+            .invoice-box {{
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }}
+            .no-print {{
+                display: none;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class=""no-print"">
+        <button class=""btn-print"" onclick=""window.print()"">In Hóa Đơn / Lưu PDF</button>
+    </div>
+    <div class=""invoice-box"">
+        <div class=""header"">
+            <h1>Hóa Đơn Tiền Phòng & Dịch Vụ</h1>
+            <p>Hệ thống quản lý nhà trọ chuyên nghiệp</p>
+        </div>
+        <table class=""info-table"">
+            <tr>
+                <td class=""label"">Mã hóa đơn:</td>
+                <td>HD-{hd.HoaDonID}</td>
+                <td class=""label"">Ngày lập:</td>
+                <td>{ngayLapText}</td>
+            </tr>
+            <tr>
+                <td class=""label"">Phòng:</td>
+                <td><strong>{hd.TenPhong}</strong></td>
+                <td class=""label"">Kỳ hóa đơn:</td>
+                <td><strong>{hd.ThangNamText}</strong></td>
+            </tr>
+            <tr>
+                <td class=""label"">Khách thuê:</td>
+                <td>{hd.TenKhach}</td>
+                <td class=""label"">Trạng thái:</td>
+                <td><span class=""status-badge {statusClass}"">{hd.TrangThai}</span></td>
+            </tr>
+        </table>
+        <table class=""details-table"">
+            <thead>
+                <tr>
+                    <th style=""width: 50px;"" class=""text-center"">STT</th>
+                    <th>Khoản mục chi tiết</th>
+                    <th style=""width: 150px;"" class=""text-right"">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class=""text-center"">1</td>
+                    <td>Tiền thuê phòng</td>
+                    <td class=""text-right"">{hd.TienThue.ToString("N0")} đ</td>
+                </tr>
+                <tr>
+                    <td class=""text-center"">2</td>
+                    <td>
+                        Tiền điện (Chỉ số: {hd.ChiSoDienDau} &rarr; {hd.ChiSoDienCuoi} = {hd.SoDienTieuThu} kWh)<br>
+                        <small style=""color: #666;"">Đơn giá: {hd.GiaDien.ToString("N0")} đ/kWh</small>
+                    </td>
+                    <td class=""text-right"">{hd.TienDien.ToString("N0")} đ</td>
+                </tr>
+                <tr>
+                    <td class=""text-center"">3</td>
+                    <td>
+                        Tiền nước (Chỉ số: {hd.ChiSoNuocDau} &rarr; {hd.ChiSoNuocCuoi} = {hd.SoNuocTieuThu} m³)<br>
+                        <small style=""color: #666;"">Đơn giá: {hd.GiaNuoc.ToString("N0")} đ/m³</small>
+                    </td>
+                    <td class=""text-right"">{hd.TienNuoc.ToString("N0")} đ</td>
+                </tr>
+                <tr>
+                    <td class=""text-center"">4</td>
+                    <td>Tiền Internet (WiFi)</td>
+                    <td class=""text-right"">{hd.TienInternet.ToString("N0")} đ</td>
+                </tr>
+                <tr>
+                    <td class=""text-center"">5</td>
+                    <td>Tiền gửi xe</td>
+                    <td class=""text-right"">{hd.TienXe.ToString("N0")} đ</td>
+                </tr>
+                <tr>
+                    <td class=""text-center"">6</td>
+                    <td>Tiền rác & dịch vụ chung</td>
+                    <td class=""text-right"">{hd.TienRac.ToString("N0")} đ</td>
+                </tr>
+                {phiKhacRow}
+            </tbody>
+        </table>
+        <div class=""total-box"">
+            <div class=""total-row"">
+                <span>Cộng tiền phòng & dịch vụ:</span>
+                <span>{hd.TongTien.ToString("N0")} đ</span>
+            </div>
+            <div class=""total-row"">
+                <span>Số tiền đã thanh toán:</span>
+                <span>{hd.SoTienDaTra.ToString("N0")} đ</span>
+            </div>
+            <div class=""total-row grand-total"">
+                <span>CÒN LẠI CẦN ĐÓNG:</span>
+                <span>{hd.ConNo.ToString("N0")} đ</span>
+            </div>
+        </div>
+        <div class=""clear""></div>
+        <table class=""info-table"" style=""margin-top: 10px;"">
+            <tr>
+                <td class=""label"">Hình thức TT:</td>
+                <td>{hd.HinhThucThanhToan ?? "N/A"}</td>
+                <td class=""label"">Ngày thanh toán:</td>
+                <td>{ngayThanhToanText}</td>
+            </tr>
+            {ghiChuRow}
+        </table>
+        <div class=""footer"">
+            <div class=""signature-box"">
+                <div class=""title"">Khách thuê ký nhận</div>
+                <div class=""name"">(Ký và ghi rõ họ tên)</div>
+            </div>
+            <div class=""signature-box"">
+                <div class=""title"">Người lập hóa đơn</div>
+                <div class=""name"">(Ký và ghi rõ họ tên)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        private string GenerateTextInvoice(HoaDon hd)
+        {
+            string ngayLapText = hd.NgayLap.ToString("dd/MM/yyyy");
+            string ngayThanhToanText = hd.NgayThanhToan.HasValue ? hd.NgayThanhToan.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa thanh toán";
+            
+            string phiKhacLine = "";
+            if (hd.PhiKhac > 0)
+            {
+                phiKhacLine = $"\n7. Phí khác ({hd.GhiChuPhiKhac}): {hd.PhiKhac.ToString("N0").PadLeft(20)} đ";
+            }
+
+            return $@"==================================================
+           HÓA ĐƠN TIỀN PHÒNG & DỊCH VỤ           
+==================================================
+Mã hóa đơn: HD-{hd.HoaDonID}
+Ngày lập: {ngayLapText}
+Kỳ hóa đơn: {hd.ThangNamText}
+Phòng: {hd.TenPhong}
+Khách thuê: {hd.TenKhach}
+Trạng thái: {hd.TrangThai}
+--------------------------------------------------
+1. Tiền thuê phòng:          {hd.TienThue.ToString("N0").PadLeft(20)} đ
+2. Tiền điện:                 {hd.TienDien.ToString("N0").PadLeft(20)} đ
+   (Chỉ số: {hd.ChiSoDienDau} -> {hd.ChiSoDienCuoi} = {hd.SoDienTieuThu} kWh * {hd.GiaDien.ToString("N0")} đ)
+3. Tiền nước:                 {hd.TienNuoc.ToString("N0").PadLeft(20)} đ
+   (Chỉ số: {hd.ChiSoNuocDau} -> {hd.ChiSoNuocCuoi} = {hd.SoNuocTieuThu} m3 * {hd.GiaNuoc.ToString("N0")} đ)
+4. Tiền Internet:             {hd.TienInternet.ToString("N0").PadLeft(20)} đ
+5. Tiền gửi xe:               {hd.TienXe.ToString("N0").PadLeft(20)} đ
+6. Tiền rác & dịch vụ khác:   {hd.TienRac.ToString("N0").PadLeft(20)} đ{phiKhacLine}
+--------------------------------------------------
+CỘNG TIỀN PHÒNG & DỊCH VỤ:    {hd.TongTien.ToString("N0").PadLeft(20)} đ
+Đã thanh toán thực tế:        {hd.SoTienDaTra.ToString("N0").PadLeft(20)} đ
+CÒN LẠI CẦN ĐÓNG:             {hd.ConNo.ToString("N0").PadLeft(20)} đ
+--------------------------------------------------
+Hình thức thanh toán: {hd.HinhThucThanhToan ?? "N/A"}
+Ngày thanh toán: {ngayThanhToanText}
+Ghi chú: {hd.GhiChu ?? "Không"}
+==================================================
+        Cảm ơn quý khách đã thanh toán!           
+==================================================
+";
         }
     }
 }

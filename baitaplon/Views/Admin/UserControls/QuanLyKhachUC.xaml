@@ -208,7 +208,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#F8F9FA" Padding="20,15,20,12" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -227,7 +226,6 @@
             </Grid>
         </Border>
 
-        <!-- Stat Cards -->
         <Border Grid.Row="1" Background="#FFFFFF" Padding="20,10,20,10" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -257,7 +255,6 @@
             </Grid>
         </Border>
 
-        <!-- Tab Control -->
         <TabControl Grid.Row="2" Margin="20,10,20,15" Background="White" BorderBrush="#CCCCCC" BorderThickness="1">
             <TabControl.Resources>
                 <Style TargetType="TabItem">
@@ -276,7 +273,6 @@
                 </Style>
             </TabControl.Resources>
 
-            <!-- Tab Khách Thuê -->
             <TabItem Header="👤 Hồ Sơ Khách Thuê">
                 <Grid Background="White" Margin="10">
                     <Grid.RowDefinitions>
@@ -284,7 +280,6 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Action Buttons -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Button Content="✏️ Sửa thông tin" Style="{StaticResource SecondaryBtn}" Margin="0,0,6,0"
                                 Command="{Binding SuaKhachCommand}" IsEnabled="{Binding CoKhachDangChon}"/>
@@ -357,7 +352,6 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab Hợp Đồng -->
             <TabItem Header="📋 Danh Sách Hợp Đồng">
                 <Grid Background="White" Margin="10">
                     <Grid.RowDefinitions>
@@ -449,7 +443,6 @@
             </TabItem>
         </TabControl>
 
-        <!-- ========== FORM THÊM/SỬA KHÁCH (Overlay) ========== -->
         <Grid Grid.RowSpan="3" Visibility="{Binding IsFormKhachVisible, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="Black" Opacity="0.4"/>
             <Border Background="White" CornerRadius="4" Width="600" MaxHeight="680"
@@ -465,7 +458,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Họ tên, Giới tính -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -484,7 +476,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- CCCD, Ngày sinh -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -502,7 +493,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- SĐT, Email -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -520,7 +510,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Quê quán, Địa chỉ -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -538,7 +527,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Người LH khẩn cấp -->
                         <TextBlock Text="NGƯỜI LIÊN HỆ KHI KHẨN CẤP" FontSize="11" FontWeight="Bold" Foreground="#B06000" Margin="0,5,0,8"/>
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
@@ -564,7 +552,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Phòng, ngày vào ở -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -585,7 +572,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Ghi chú -->
                         <TextBlock Text="Ghi chú thông tin thêm" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormKhach.GhiChu, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="50" 
@@ -603,7 +589,6 @@
             </Border>
         </Grid>
 
-        <!-- ========== FORM HỢP ĐỒNG (Overlay) ========== -->
         <Grid Grid.RowSpan="3" Visibility="{Binding IsFormHopDongVisible, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="Black" Opacity="0.4"/>
             <Border Background="White" CornerRadius="4" Width="550" MaxHeight="600"
@@ -619,7 +604,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Khách, Phòng -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -643,7 +627,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Ngày bắt đầu, kết thúc -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -659,7 +642,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Giá thuê, tiền cọc -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -677,14 +659,12 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Điều khoản -->
                         <TextBlock Text="Các điều khoản quy định" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormHopDong.DieuKhoan, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="70"
                                  TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,12"
                                  VerticalContentAlignment="Top"/>
 
-                        <!-- Ghi chú -->
                         <TextBlock Text="Ghi chú hợp đồng" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormHopDong.GhiChu, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="40"

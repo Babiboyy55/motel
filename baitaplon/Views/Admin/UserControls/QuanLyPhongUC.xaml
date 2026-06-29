@@ -209,7 +209,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#F8F9FA" Padding="20,15,20,12" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -233,7 +232,6 @@
             </Grid>
         </Border>
 
-        <!-- Stat Cards + Filter -->
         <Border Grid.Row="1" Background="#FFFFFF" Padding="20,10,20,10" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -244,7 +242,6 @@
                     <ColumnDefinition Width="2.5*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Stat Cards (Bản SV làm: Khung viền đơn giản) -->
                 <Border Background="#F2F7FB" BorderBrush="#B9D3EE" BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,6,0">
                     <StackPanel>
                         <TextBlock Text="{Binding SoPhongTong}" FontSize="22" FontWeight="Bold" Foreground="#0066CC" HorizontalAlignment="Center"/>
@@ -270,7 +267,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Search + Filter -->
                 <Grid Grid.Column="4" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -286,7 +282,6 @@
             </Grid>
         </Border>
 
-        <!-- Main Content: DataGrid -->
         <Grid Grid.Row="2" Margin="20,10,20,15">
             <Border Background="White" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4">
                 <DataGrid ItemsSource="{Binding DanhSachPhong}" 
@@ -360,7 +355,6 @@
             </Border>
         </Grid>
 
-        <!-- ========================= FORM THÊM/SỬA PHÒNG (Overlay) ========================= -->
         <Grid Grid.RowSpan="3" Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="Black" Opacity="0.4"/>
             <Border Background="White" CornerRadius="4" Width="600" MaxHeight="680"
@@ -368,7 +362,6 @@
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="25">
-                        <!-- Title -->
                         <Border Margin="0,0,0,15" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="0,0,0,8">
                             <Grid>
                                 <TextBlock Text="{Binding FormTitle}" FontSize="16" FontWeight="Bold" Foreground="#0066CC"/>
@@ -377,7 +370,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Row 1: Số phòng, Loại phòng, Tầng -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -412,7 +404,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Row 2: Diện tích, Giá thuê -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -430,7 +421,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Row 3: Giá điện, nước, internet -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -454,7 +444,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Row 4: Nội thất, Trạng thái -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -474,7 +463,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Tiện ích (SV làm: Checkbox chữ đen nền sáng) -->
                         <TextBlock Text="CÁC TIỆN ÍCH CÓ SẴN" Style="{StaticResource LabelStyle}" Margin="0,4,0,6"/>
                         <WrapPanel Margin="0,0,0,12">
                             <CheckBox Content="Mạng WiFi" IsChecked="{Binding FormPhong.CoWifi}" Foreground="Black" Margin="0,0,12,6" FontSize="12"/>
@@ -487,14 +475,12 @@
                             <CheckBox Content="Tivi" IsChecked="{Binding FormPhong.CoTivi}" Foreground="Black" Margin="0,0,12,6" FontSize="12"/>
                         </WrapPanel>
 
-                        <!-- Mô tả -->
                         <TextBlock Text="Ghi chú mô tả" Style="{StaticResource LabelStyle}"/>
                         <TextBox Text="{Binding FormPhong.MoTa, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputStyle}" Height="60" 
                                  TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"
                                  VerticalContentAlignment="Top"/>
 
-                        <!-- Buttons -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                             <Button Content="Hủy bỏ" Style="{StaticResource SecondaryBtn}" 
                                     Command="{Binding HuyCommand}" Margin="0,0,6,0" Width="80"/>
